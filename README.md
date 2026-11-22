@@ -24,6 +24,7 @@ Sonra <http://localhost:4173> adresini aç.
 - **Kavurma planı** — bu haftanın kutu/kapasite oranı, atlayan abone sayısı ve bir sonraki kavurma.
 - **Riskli aboneler** — risk skoruna göre sıralı liste. Her satırdaki **Mesaj** düğmesi, müşteriye özel bir taslak açar; taslağı düzenleyip panoya kopyalayabilir veya e-posta uygulamasında açabilirsin.
 - **Aboneler** — 24 kişilik tam liste; arama, Tümü/Riskli/Sağlıklı filtresi ve sıralama. Mobilde tablo, tüm alanları koruyan iki satırlı kartlara dönüşür.
+- **Abone detayı** — bir aboneye (tablo satırı, kart veya riskli abone satırı) tıklayınca sağdan detay çekmecesi açılır: risk skoru ve durumu, plan, üyelik süresi, son kutu, sinyal ve e-posta. Çekmeceden e-posta kopyalanabilir veya kişiye özel mesaj taslağı açılabilir.
 - **CSV indir** — haftalık akışı ve abone listesini tek dosyada indirir.
 - Klavye: `/` aramaya gider, `Esc` açık katmanı kapatır, tüm kontroller klavyeyle kullanılabilir.
 

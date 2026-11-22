@@ -300,6 +300,50 @@
     </div>
   </dialog>
 
+  <dialog class="sheet-dialog detail-drawer" id="subscriber-drawer" aria-labelledby="drawer-name" aria-describedby="drawer-meta">
+    <div class="dialog-inner detail-inner">
+      <header class="dialog-head">
+        <div>
+          <h2 id="drawer-name"></h2>
+          <p class="meta" id="drawer-meta"></p>
+        </div>
+        <button class="icon-btn" id="drawer-close" type="button" aria-label="Abone detayını kapat">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </header>
+
+      <div class="detail-risk" id="drawer-risk" data-level="watch">
+        <div class="detail-risk-head">
+          <p class="detail-risk-label">Risk skoru</p>
+          <span class="pill" id="drawer-pill"></span>
+        </div>
+        <p class="detail-risk-score"><span id="drawer-risk-value">0</span><small>/100</small></p>
+        <span class="detail-track" aria-hidden="true"><i id="drawer-risk-bar" style="width:0%"></i></span>
+      </div>
+
+      <dl class="detail-list">
+        <dt>Plan</dt>
+        <dd id="drawer-plan"></dd>
+        <dt>Üyelik</dt>
+        <dd id="drawer-tenure"></dd>
+        <dt>Son kutu</dt>
+        <dd id="drawer-lastbox"></dd>
+        <dt>Sinyal</dt>
+        <dd id="drawer-signal"></dd>
+        <dt>E-posta</dt>
+        <dd><a class="detail-mail" id="drawer-mail" href="#"></a></dd>
+        <dt>Abone no</dt>
+        <dd class="mono" id="drawer-id"></dd>
+      </dl>
+
+      <div class="dialog-actions detail-actions">
+        <button class="btn" id="drawer-copy" type="button">E-postayı kopyala</button>
+        <button class="btn primary" id="drawer-message" type="button">Mesaj hazırla</button>
+      </div>
+      <p class="dialog-hint">Risk skoru 35 ve üzeri aboneler riskli listesinde izlenir; detaylar demo verisinden gelir.</p>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="assets/data.js"></script>

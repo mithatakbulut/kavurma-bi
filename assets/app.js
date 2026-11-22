@@ -104,6 +104,11 @@
   const messageButton = (customer) =>
     `<button class="row-action" type="button" data-message="${esc(customer.id)}" aria-label="${esc(customer.name)} için mesaj hazırla">Mesaj</button>`;
 
+  // The name is a real button so the drawer opens from the keyboard; the row
+  // itself is clickable too, for the rest of the line.
+  const openButton = (customer, inner) =>
+    `<button class="row-open" type="button" data-open="${esc(customer.id)}" aria-label="${esc(customer.name)} abone detayını aç">${inner}</button>`;
+
   const renderSubs = () => {
     const rows = filteredCustomers();
     const counts = { all: D.customers.length, risk: riskCustomers.length, healthy: healthyCustomers.length };
@@ -118,10 +123,9 @@
     $('#sub-count').textContent = `${int.format(rows.length)} abone`;
 
     $('#subs-body').innerHTML = rows.map((customer) => `
-      <tr>
-        <td>
-          <span class="name">${esc(customer.name)}</span>
-          <span class="id">${esc(customer.id)}</span>
+      <tr data-open="${esc(customer.id)}">
+        <td class="name-cell">
+          ${openButton(customer, `<span class="name">${esc(customer.name)}</span><span class="id">${esc(customer.id)}</span>`)}
         </td>
         <td>${esc(customer.plan)}</td>
         <td class="n tenure-col">${int.format(customer.months)} ay</td>
@@ -133,12 +137,9 @@
     `).join('');
 
     $('#subs-cards').innerHTML = rows.map((customer) => `
-      <article class="sub-row">
+      <article class="sub-row" data-open="${esc(customer.id)}">
         <div class="sub-top">
-          <div>
-            <span class="name">${esc(customer.name)}</span>
-            <span class="id">${esc(customer.id)}</span>
-          </div>
+          ${openButton(customer, `<span class="name">${esc(customer.name)}</span><span class="id">${esc(customer.id)}</span>`)}
           <span class="sub-risk" aria-label="Risk skoru ${int.format(customer.risk)}">${int.format(customer.risk)}</span>
         </div>
         <p class="sub-meta">${esc(customer.plan)} · ${int.format(customer.months)} ay · son kutu ${fmtDay(customer.lastBox)}</p>
@@ -190,10 +191,9 @@
 
   /* ---------- risk preview ---------- */
   $('#risk-rows').innerHTML = riskCustomers.slice(0, 4).map((customer) => `
-    <div class="risk-row">
+    <div class="risk-row" data-open="${esc(customer.id)}">
       <div class="who">
-        <span class="name">${esc(customer.name)}</span>
-        <span class="sub">${esc(customer.plan)} · ${int.format(customer.months)} ay</span>
+        ${openButton(customer, `<span class="name">${esc(customer.name)}</span><span class="sub">${esc(customer.plan)} · ${int.format(customer.months)} ay</span>`)}
       </div>
       <span class="signal" title="${esc(customer.signal)}">${esc(customer.signal)}</span>
       <span class="risk-rank">${int.format(customer.risk)}</span>
@@ -467,11 +467,11 @@
     return `Merhaba ${first}, Kavurma’daki ${customer.plan} aboneliğin için kısa bir not bırakmak istedim. Son kutunun senin için nasıl gittiğini merak ediyorum; bir sonraki kavurmayı birlikte planlayabiliriz. - Elif`;
   };
 
-  function openMessage(id) {
+  function openMessage(id, returnTo = document.activeElement) {
     const customer = D.customers.find((row) => row.id === id);
     if (!customer) return;
     currentCustomer = customer;
-    dialogReturn = document.activeElement;
+    dialogReturn = returnTo;
     msgName.textContent = customer.name;
     msgPlan.textContent = `${customer.plan} · ${int.format(customer.months)} aydır abone · son kutu ${fmtDay(customer.lastBox)}`;
     msgSignal.textContent = `${customer.risk >= RISK_FLOOR ? 'Sinyal' : 'Durum'}: ${customer.signal}`;
@@ -538,6 +538,113 @@
     const subject = `Kavurma · ${currentCustomer.plan} aboneliğin hakkında`;
     const body = msgBody.value;
     location.href = `mailto:${encodeURIComponent(currentCustomer.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
+
+  /* ---------- subscriber detail drawer ---------- */
+  const drawer = $('#subscriber-drawer');
+  const drawerName = $('#drawer-name');
+  const drawerMeta = $('#drawer-meta');
+  const drawerRisk = $('#drawer-risk');
+  const drawerPill = $('#drawer-pill');
+  const drawerRiskValue = $('#drawer-risk-value');
+  const drawerRiskBar = $('#drawer-risk-bar');
+  const drawerPlan = $('#drawer-plan');
+  const drawerTenure = $('#drawer-tenure');
+  const drawerLastBox = $('#drawer-lastbox');
+  const drawerSignal = $('#drawer-signal');
+  const drawerMail = $('#drawer-mail');
+  const drawerId = $('#drawer-id');
+  const drawerCopy = $('#drawer-copy');
+  let drawerCustomer = null;
+  let drawerReturn = null;
+  let drawerRestoreFocus = true;
+
+  const riskLevel = (risk) => {
+    if (risk >= 60) return { level: 'high', label: 'Yüksek risk', pill: 'negative' };
+    if (risk >= RISK_FLOOR) return { level: 'watch', label: 'İzlemede', pill: 'neutral' };
+    return { level: 'healthy', label: 'Sağlıklı', pill: 'positive' };
+  };
+
+  const daysSince = (iso) => Math.round((dateOf(D.snapshot.date) - dateOf(iso)) / 86400000);
+  const fmtAgo = (iso) => {
+    const days = daysSince(iso);
+    if (days <= 0) return 'bugün';
+    if (days === 1) return 'dün';
+    return `${int.format(days)} gün önce`;
+  };
+
+  function openDrawer(id, returnTo = document.activeElement) {
+    const customer = D.customers.find((row) => row.id === id);
+    if (!customer) return;
+    const level = riskLevel(customer.risk);
+    drawerCustomer = customer;
+    drawerReturn = returnTo;
+    drawerName.textContent = customer.name;
+    drawerMeta.textContent = `${customer.id} · ${customer.plan}`;
+    drawerRisk.dataset.level = level.level;
+    drawerPill.className = `pill ${level.pill}`;
+    drawerPill.textContent = level.label;
+    drawerRiskValue.textContent = int.format(customer.risk);
+    drawerRiskBar.style.width = `${Math.min(100, Math.max(2, customer.risk))}%`;
+    drawerPlan.textContent = customer.plan;
+    drawerTenure.textContent = `${int.format(customer.months)} ay`;
+    drawerLastBox.textContent = `${fmtDay(customer.lastBox)} · ${fmtAgo(customer.lastBox)}`;
+    drawerSignal.textContent = customer.signal;
+    drawerMail.textContent = customer.email;
+    drawerMail.href = `mailto:${customer.email}`;
+    drawerId.textContent = customer.id;
+    drawerCopy.textContent = 'E-postayı kopyala';
+    drawerCopy.disabled = false;
+    if (!drawer.open) drawer.showModal();
+    $('#drawer-close').focus();
+  }
+
+  const closeDrawer = (restoreFocus = true) => {
+    drawerRestoreFocus = restoreFocus;
+    if (drawer.open) drawer.close();
+  };
+
+  $('#drawer-close').addEventListener('click', () => closeDrawer());
+  drawer.addEventListener('click', (event) => {
+    if (event.target === drawer) closeDrawer();
+  });
+  drawer.addEventListener('close', () => {
+    const target = drawerReturn;
+    drawerCustomer = null;
+    drawerReturn = null;
+    if (drawerRestoreFocus && target && document.contains(target) && target.offsetParent !== null) {
+      target.focus();
+    }
+  });
+
+  // Rows are clickable, the name inside them is a button. The message action
+  // must not bubble into the drawer.
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('[data-message]')) return;
+    const opener = event.target.closest('[data-open]');
+    if (!opener) return;
+    const target = opener.matches('button') ? opener : $('.row-open', opener);
+    openDrawer(opener.dataset.open, target || document.activeElement);
+  });
+
+  $('#drawer-message').addEventListener('click', () => {
+    if (!drawerCustomer) return;
+    const id = drawerCustomer.id;
+    const returnTo = drawerReturn;
+    closeDrawer(false);
+    openMessage(id, returnTo);
+  });
+
+  $('#drawer-copy').addEventListener('click', async () => {
+    if (!drawerCustomer) return;
+    const copied = await copyText(drawerCustomer.email);
+    drawerCopy.textContent = copied ? 'Kopyalandı' : 'Kopyalanamadı';
+    drawerCopy.disabled = true;
+    clearTimeout(drawerCopy.timer);
+    drawerCopy.timer = setTimeout(() => {
+      drawerCopy.textContent = 'E-postayı kopyala';
+      drawerCopy.disabled = false;
+    }, 2000);
   });
 
   /* ---------- CSV ---------- */
