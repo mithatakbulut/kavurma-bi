@@ -1,0 +1,65 @@
+name: Record Attest deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: attest-deployment-record
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record the merge commit deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          ENVIRONMENT: production
+          ENVIRONMENT_URL: https://kavurma.quotic.xyz
+        run: |
+          set -euo pipefail
+
+          # Attest verifies merged-PR runs against a GitHub Deployment for the
+          # exact merge commit. Vercel deploys main but does not publish that
+          # deployment record, so create it here. The environment URL must match
+          # the host used by the catalog tests.
+          deployment_id="$(jq -n \
+            --arg ref "$SHA" \
+            --arg environment "$ENVIRONMENT" \
+            '{ref: $ref, environment: $environment, auto_merge: false, required_contexts: []}' \
+            | gh api -X POST "repos/$REPOSITORY/deployments" --input - --jq .id)"
+
+          jq -n \
+            --arg state success \
+            --arg environment "$ENVIRONMENT" \
+            --arg environment_url "$ENVIRONMENT_URL" \
+            --arg description "Attest QA target for $SHA" \
+            '{state: $state, environment: $environment, environment_url: $environment_url, description: $description}' \
+            | gh api -X POST "repos/$REPOSITORY/deployments/$deployment_id/statuses" --input - \
+            --jq '{id, state, environment_url}'
+
+          # Fail loudly if the URL is not reachable. The recorded status stays
+          # success only when the site answers; Attest then performs its own
+          # commit and host checks.
+          code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --header 'Cache-Control: no-cache' "$ENVIRONMENT_URL/?attest_deploy=$SHA")"
+          if [ "$code" != "200" ]; then
+            jq -n \
+              --arg state failure \
+              --arg environment "$ENVIRONMENT" \
+              --arg environment_url "$ENVIRONMENT_URL" \
+              --arg description "Attest QA target returned HTTP $code for $SHA" \
+              '{state: $state, environment: $environment, environment_url: $environment_url, description: $description}' \
+              | gh api -X POST "repos/$REPOSITORY/deployments/$deployment_id/statuses" --input - >/dev/null
+            echo "::error::$ENVIRONMENT_URL returned HTTP $code"
+            exit 1
+          fi
