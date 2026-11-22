@@ -2,3 +2,4 @@
 .taste-skill/
 node_modules/
 *.log
+.vercel

@@ -2,6 +2,8 @@
 
 Küçük bir BI dashboard demosu. Kavurma Roasters'ın (kurgusal bir İstanbul kavurmacısı) aylık kahve aboneliğini izler: büyüme churn'ü yeniyor mu, aboneler hangi planlarda, bu hafta kaç kutu kavrulacak ve kim ayrılmak üzere?
 
+**Canlı demo:** <https://kavurma.quotic.xyz>
+
 ![Genel bakış](docs/overview.png)
 
 ## Çalıştırma
