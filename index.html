@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kavurma · Abonelik sağlığı</title>
+  <meta name="description" content="Kavurma Roasters için abonelik sağlığı panosu: büyüme, iptaller, plan dağılımı ve riskli aboneler.">
+  <meta name="theme-color" content="#f1f4ef">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">İçeriğe geç</a>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Ana gezinme">
+      <button class="sidebar-close" id="sidebar-close" type="button" aria-label="Menüyü kapat">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+      </button>
+
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <ellipse cx="12" cy="12" rx="7.2" ry="9.6" transform="rotate(34 12 12)" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8.4 6.6c3.2 1.3 4.1 4.5 2.5 7.1-1.1 1.8-1.2 3.7-.4 5.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <span class="brand-name">Kavurma</span>
+          <span class="brand-scope">Kadıköy · İstanbul</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Bölümler">
+        <p class="group-label">İzleme</p>
+        <a class="nav-item" href="#genel-bakis" data-nav="overview" aria-current="page">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="5.5" height="5.5" rx="1"/><rect x="11.5" y="3" width="5.5" height="5.5" rx="1"/><rect x="3" y="11.5" width="5.5" height="5.5" rx="1"/><rect x="11.5" y="11.5" width="5.5" height="5.5" rx="1"/></svg>
+          Genel bakış
+        </a>
+        <a class="nav-item" href="#aboneler" data-nav="subscribers">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="7" r="2.6"/><path d="M3.4 16c.5-2.6 2.4-4.1 4.6-4.1s4.1 1.5 4.6 4.1"/><path d="M13.1 4.7a2.6 2.6 0 0 1 0 4.8M14.8 12.2c1.2.5 2.1 1.8 2.4 3.8"/></svg>
+          Aboneler
+        </a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="user">
+          <span class="avatar lg" aria-hidden="true">ED</span>
+          <div>
+            <strong>Elif Demir</strong>
+            <span>Operasyon</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Menüyü aç">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14"/></svg>
+        </button>
+
+        <a class="mobile-brand" href="#genel-bakis" aria-label="Kavurma, genel bakışa dön">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <ellipse cx="12" cy="12" rx="7.2" ry="9.6" transform="rotate(34 12 12)" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8.4 6.6c3.2 1.3 4.1 4.5 2.5 7.1-1.1 1.8-1.2 3.7-.4 5.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>Kavurma</span>
+        </a>
+
+        <nav class="crumbs" aria-label="Konum">
+          <span>Kavurma Roasters</span>
+          <span class="sep" aria-hidden="true">/</span>
+          <span class="current" id="crumb-current">Genel bakış</span>
+        </nav>
+
+        <form class="search" id="global-search" role="search">
+          <label class="sr-only" for="global-q">Abone ara</label>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+          <input id="global-q" type="search" placeholder="Abone ara" autocomplete="off" spellcheck="false">
+          <kbd aria-hidden="true">/</kbd>
+        </form>
+
+        <div class="topbar-actions">
+          <button class="btn export" type="button" data-export title="Haftalık akışı ve abone listesini CSV olarak indir">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v7M5 7l3 3 3-3M2.5 11.5v1.2a.8.8 0 0 0 .8.8h9.4a.8.8 0 0 0 .8-.8v-1.2"/></svg>
+            <span class="export-text">CSV indir</span>
+          </button>
+          <span class="avatar" role="img" aria-label="Elif Demir">ED</span>
+        </div>
+      </header>
+
+      <main class="sheet" id="main">
+        <section class="view" id="view-overview" aria-labelledby="overview-title">
+          <div class="title-row">
+            <div>
+              <h1 id="overview-title">Abonelik sağlığı</h1>
+              <p class="finding" id="finding">Büyüme sürüyor; iptaller son dört haftada <strong>9</strong>’dan <strong>13</strong>’e çıktı.</p>
+            </div>
+            <div class="title-actions">
+              <p class="stamp" id="stamp">22 Kas 2026, 09:42 itibarıyla</p>
+              <a class="btn primary" href="#aboneler?filter=risk">Riskli <span data-risk-count>12</span> aboneye ulaş</a>
+            </div>
+          </div>
+
+          <div class="kpis" aria-label="Son dört haftanın özeti">
+            <div class="kpi lead">
+              <p class="kpi-label">Aylık yinelenen gelir</p>
+              <p class="kpi-value" id="kpi-mrr">₺1.284.458</p>
+              <p class="kpi-delta" id="kpi-mrr-delta"><span class="pos">+₺32.076</span> <span class="baseline">son 4 hafta</span></p>
+            </div>
+            <div class="kpi">
+              <p class="kpi-label">Aktif abone</p>
+              <p class="kpi-value" id="kpi-active">1.842</p>
+              <p class="kpi-delta" id="kpi-active-delta"><span class="pos">+46</span> <span class="baseline">son 4 hafta</span></p>
+            </div>
+            <div class="kpi">
+              <p class="kpi-label">Yeni abone</p>
+              <p class="kpi-value" id="kpi-new">90</p>
+              <p class="kpi-delta" id="kpi-new-delta"><span class="pos">+12</span> <span class="baseline">son 4 hafta</span></p>
+            </div>
+            <div class="kpi">
+              <p class="kpi-label">Aylık churn</p>
+              <p class="kpi-value" id="kpi-churn">%2,4</p>
+              <p class="kpi-delta" id="kpi-churn-delta"><span class="neg">0,5 puan arttı</span> <span class="baseline">· önceki 4 hafta %1,9</span></p>
+            </div>
+          </div>
+
+          <div class="dash-grid">
+            <section class="panel chart-panel span-8" aria-labelledby="flow-title">
+              <div class="panel-head chart-head">
+                <div>
+                  <h2 id="flow-title">Abone akışı</h2>
+                  <p class="meta">Haftalık katılan ve ayrılan</p>
+                </div>
+                <div class="segmented" role="group" aria-label="Grafik dönemi">
+                  <button type="button" data-window="4" aria-pressed="false">4 hafta</button>
+                  <button type="button" data-window="8" aria-pressed="true">8 hafta</button>
+                  <button type="button" data-window="13" aria-pressed="false">13 hafta</button>
+                </div>
+              </div>
+              <p class="chart-summary" id="flow-summary">Son 8 haftada net <strong>+91</strong> abone</p>
+              <div class="chart" id="flow-chart"></div>
+              <p class="chart-source">Kaynak: Kavurma abonelik veritabanı</p>
+            </section>
+
+            <div class="rail span-4">
+              <section class="panel plan-panel" aria-labelledby="plan-title">
+                <div class="panel-head">
+                  <div>
+                    <h2 id="plan-title">Plan dağılımı</h2>
+                    <p class="meta">Aboneye göre</p>
+                  </div>
+                </div>
+                <div class="plan-list" id="plan-list"></div>
+              </section>
+
+              <section class="panel roast-panel" aria-labelledby="roast-title">
+                <div class="panel-head">
+                  <div>
+                    <h2 id="roast-title">Kavurma planı</h2>
+                    <p class="meta" id="roast-meta">24 Kas Salı, 06:00</p>
+                  </div>
+                </div>
+                <div class="roast-head">
+                  <span class="roast-figure num" id="roast-figure">1.764 <small>/ 2.100 kutu</small></span>
+                  <span class="roast-pct num" id="roast-pct">%84</span>
+                </div>
+                <span class="capacity" aria-hidden="true"><i id="capacity-fill" style="width:84%"></i></span>
+                <p class="roast-note" id="roast-note">78 abone bu haftayı atladı</p>
+              </section>
+            </div>
+
+            <section class="panel risk-panel span-8" aria-labelledby="risk-title">
+              <div class="panel-head">
+                <div>
+                  <h2 id="risk-title">Riskli aboneler</h2>
+                  <p class="meta">Risk skoruna göre</p>
+                </div>
+                <a class="panel-link" href="#aboneler?filter=risk">Tümünü gör</a>
+              </div>
+              <div class="risk-list">
+                <div class="risk-head" aria-hidden="true">
+                  <span>Abone</span>
+                  <span>Sinyal</span>
+                  <span class="num">Risk</span>
+                  <span class="head-action"></span>
+                </div>
+                <div id="risk-rows"></div>
+              </div>
+            </section>
+
+            <section class="panel channels-panel span-4" aria-labelledby="channels-title">
+              <div class="panel-head">
+                <div>
+                  <h2 id="channels-title">Abone kaynağı</h2>
+                  <p class="meta">Son 4 hafta</p>
+                </div>
+              </div>
+              <div class="channel-list" id="channel-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-subscribers" aria-labelledby="subs-title" hidden>
+          <div class="title-row subs-title">
+            <div>
+              <h1 id="subs-title">Aboneler</h1>
+              <p class="view-sub">Kadıköy mutfağındaki abonelikler; risk skoruna göre izlenir.</p>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="field-search">
+              <label class="sr-only" for="sub-q">Abone ara</label>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+              <input id="sub-q" type="search" placeholder="İsim veya sinyal ara" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="chips" role="group" aria-label="Abone filtresi">
+              <button class="chip" type="button" data-filter="all" aria-pressed="true">Tümü <span class="count">24</span></button>
+              <button class="chip" type="button" data-filter="risk" aria-pressed="false">Riskli <span class="count">12</span></button>
+              <button class="chip" type="button" data-filter="healthy" aria-pressed="false">Sağlıklı <span class="count">12</span></button>
+            </div>
+            <span class="spacer"></span>
+            <label class="sr-only" for="sub-sort">Sıralama</label>
+            <select class="select" id="sub-sort">
+              <option value="risk">Risk skoruna göre</option>
+              <option value="name">İsme göre</option>
+              <option value="months">Üyelik süresine göre</option>
+            </select>
+          </div>
+
+          <p class="result-count" id="sub-count" aria-live="polite">24 abone</p>
+
+          <div class="table-wrap">
+            <table class="subs-table">
+              <colgroup>
+                <col style="width:30%">
+                <col style="width:11%">
+                <col style="width:8%">
+                <col style="width:9%">
+                <col>
+                <col style="width:7%">
+                <col style="width:7%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th scope="col">Abone</th>
+                  <th scope="col">Plan</th>
+                  <th scope="col" class="n tenure-col">Üyelik</th>
+                  <th scope="col" class="n last-col">Son kutu</th>
+                  <th scope="col">Sinyal</th>
+                  <th scope="col" class="n">Risk</th>
+                  <th scope="col"><span class="sr-only">Mesaj</span></th>
+                </tr>
+              </thead>
+              <tbody id="subs-body"></tbody>
+            </table>
+          </div>
+
+          <div class="subs-cards" id="subs-cards"></div>
+
+          <div class="empty-state" id="subs-empty" hidden>
+            <strong>Aramanla eşleşen abone yok.</strong>
+            <span>Filtreyi temizleyip 24 abonenin tamamına bakabilirsin.</span>
+            <button class="row-action" type="button" id="clear-filters">Filtreyi temizle</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog class="sheet-dialog" id="message-dialog" aria-labelledby="msg-title" aria-describedby="msg-hint">
+    <div class="dialog-inner">
+      <header class="dialog-head">
+        <div>
+          <h2 id="msg-title">Mesaj hazırla</h2>
+          <p class="meta">Kavurma · abone iletişimi</p>
+        </div>
+        <button class="icon-btn" id="msg-close" type="button" aria-label="Kapat">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </header>
+
+      <div class="msg-context">
+        <p class="who" id="msg-name"></p>
+        <p class="meta" id="msg-plan"></p>
+        <p class="signal" id="msg-signal"></p>
+      </div>
+
+      <div class="msg-field">
+        <label for="msg-body">Mesaj</label>
+        <textarea id="msg-body" spellcheck="false"></textarea>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn" id="msg-mail" type="button">E-posta aç</button>
+        <button class="btn primary" id="msg-copy" type="button">Mesajı kopyala</button>
+      </div>
+      <p class="dialog-hint" id="msg-hint">Bu demo mesaj göndermez; panoya kopyalar veya e-posta uygulamanızda açar.</p>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/charts.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
