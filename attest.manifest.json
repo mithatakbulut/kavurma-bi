@@ -7,10 +7,34 @@
   },
   "routes": [
     {
+      "id": "sign-in",
+      "path": "/#giris",
+      "description": "Public demo sign-in gate with e-mail and password fields, an inline error for wrong credentials, and a list of three mock accounts covering the admin, operations and viewer roles.",
+      "feature": "authentication",
+      "files": [
+        "index.html",
+        "assets/app.js",
+        "assets/data.js",
+        "assets/app.css"
+      ],
+      "notes": [
+        "Public route: it is the only view reachable without a session; every other hash redirects here.",
+        "The three demo credentials are shown on the sign-in card on purpose. They are mock values checked in the browser, not real accounts.",
+        "Successful sign-in stores {email, role, name, title} in sessionStorage under kavurma.session; there is no cookie, localStorage persistence, backend or real credential verification.",
+        "A fresh browser session starts signed out; reloading the same tab keeps the session until sign-out or tab close.",
+        "The password field has a show/hide control; demo account rows fill the form for keyboard and manual testing."
+      ]
+    },
+    {
       "id": "overview",
       "path": "/#genel-bakis",
       "description": "Subscription health overview with a headline finding, four KPIs (MRR, active subscribers, new subscribers, monthly churn), a weekly joins/cancellations chart, plan distribution, roast capacity, the top at-risk subscribers, and acquisition channels.",
       "feature": "subscription-health",
+      "roles": [
+        "admin",
+        "operations",
+        "viewer"
+      ],
       "files": [
         "index.html",
         "assets/app.js",
@@ -18,9 +42,11 @@
         "assets/charts.js"
       ],
       "notes": [
-        "Default view: an empty hash or an unrecognized hash renders this view; the canonical deep link is /#genel-bakis.",
+        "Default view after sign-in: an empty hash or an unrecognized hash renders this view; the canonical deep link is /#genel-bakis.",
+        "Protected route: without a session, /#genel-bakis and every other non-sign-in hash redirect to /#giris.",
         "The subscriber-flow chart can be switched between 4, 8 and 13 weeks.",
-        "The at-risk preview shows four at-risk subscribers and links to /#aboneler?filter=risk."
+        "The at-risk preview shows four at-risk subscribers and links to /#aboneler?filter=risk.",
+        "The at-risk message buttons are hidden for the viewer role."
       ]
     },
     {
@@ -28,23 +54,34 @@
       "path": "/#aboneler",
       "description": "Full subscriber list with name, ID, plan, tenure, last box date, signal and risk score. Supports text search, all/risky/healthy filters, sorting, and opening a per-subscriber message draft.",
       "feature": "subscriber-management",
+      "roles": [
+        "admin",
+        "operations",
+        "viewer"
+      ],
       "files": [
         "index.html",
         "assets/app.js",
         "assets/data.js"
       ],
       "notes": [
+        "Protected route: without a session, /#aboneler redirects to /#giris.",
         "Supported hash query parameters: filter=all|risk|healthy and q=<search text>; invalid filter values fall back to all.",
         "A subscriber is classified as risky when the risk score is 35 or higher.",
         "Search matches name, subscriber ID, plan and signal, using Turkish-aware case and diacritic folding.",
         "Sort order is UI state only and is not stored in the URL.",
-        "Message drafting opens a <dialog> overlay; it is not a separate route."
+        "Message drafting opens a <dialog> overlay; it is not a separate route.",
+        "The viewer role can search, filter, sort and open the read-only subscriber drawer, but the message action and its drawer button are hidden."
       ]
     },
     {
       "id": "actions",
       "path": "/#aksiyonlar",
       "feature": "action-queue",
+      "roles": [
+        "admin",
+        "operations"
+      ],
       "description": "Operations queue for delivery, payment and win-back actions tied to at-risk subscribers, with category chips, a status filter, a resolution modal (compensation type plus operations note, mark resolved or reopen) and a handoff to the subscriber message draft.",
       "files": [
         "index.html",
@@ -54,6 +91,8 @@
       ],
       "notes": [
         "Hash route: the server receives only /; the canonical deep link is /#aksiyonlar.",
+        "Protected route: without a session, /#aksiyonlar redirects to /#giris; with the viewer role it redirects to /#genel-bakis and shows a non-blocking notice.",
+        "The actions navigation link, CSV export, message buttons and resolution controls are hidden for the viewer role.",
         "Category filter values are all|teslimat|odeme|geri-kazanim; status filter values are all|pending|resolved.",
         "Resolving or reopening an action updates only in-memory demo state and resets on reload.",
         "The row action button opens the resolution modal, while the row itself opens the subscriber drawer."
@@ -61,6 +100,23 @@
     }
   ],
   "flows": [
+    {
+      "id": "sign-in-and-choose-role",
+      "description": "Open the public sign-in gate and enter the dashboard with one of the three demo accounts. Admin and operations roles open every view and action; the viewer role is limited to the overview and subscriber list.",
+      "routeIds": [
+        "sign-in"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled for the mock credential check, session storage and role-based UI",
+        "Browser sessionStorage is available (a fresh browser session starts signed out)"
+      ],
+      "testDataRequirements": [
+        "Admin demo account: admin@kavurma.co, Elif Demir, role admin",
+        "Operations demo account: ops@kavurma.co, Deniz Acar, role operations",
+        "Viewer demo account: viewer@kavurma.co, Ece Yılmaz, role viewer",
+        "Passwords are shown on the sign-in card and are intentionally not recorded in this manifest"
+      ]
+    },
     {
       "id": "review-subscription-health",
       "description": "Open the overview and read the headline finding, KPIs, weekly subscriber flow, plan mix, roast capacity, at-risk preview and acquisition channels; switch the flow chart between 4, 8 and 13 weeks.",
@@ -108,6 +164,10 @@
         "overview",
         "subscribers"
       ],
+      "roles": [
+        "admin",
+        "operations"
+      ],
       "prerequisites": [
         "JavaScript is enabled",
         "For the email action, an operating-system or browser handler for mailto: links"
@@ -128,6 +188,10 @@
         "overview",
         "subscribers"
       ],
+      "roles": [
+        "admin",
+        "operations"
+      ],
       "prerequisites": [
         "JavaScript is enabled",
         "The browser permits local file downloads"
@@ -146,6 +210,10 @@
         "actions",
         "subscribers"
       ],
+      "roles": [
+        "admin",
+        "operations"
+      ],
       "prerequisites": [
         "JavaScript is enabled"
       ],
@@ -161,6 +229,11 @@
         "subscribers",
         "actions"
       ],
+      "roles": [
+        "admin",
+        "operations",
+        "viewer"
+      ],
       "prerequisites": [
         "JavaScript is enabled for view switching",
         "The mobile menu is used at viewport widths below 861px"
@@ -168,11 +241,12 @@
     }
   ],
   "notes": [
-    "Hash-based client-side routing: all three views (overview, subscribers and actions) are sections of index.html, not separate server routes. The server receives only /.",
-    "No authentication, authorization, user accounts or roles are implemented. The sidebar user and all subscriber identities are static, fictional demo content.",
+    "Mock authentication is implemented entirely client-side for demo and QA purposes: three demo accounts, a sessionStorage record under kavurma.session, and a public /#giris sign-in route. There is no backend, no cookie, no real credential verification and no security boundary.",
+    "Role gating is part of the demo UI, not an authorization control. Admin and operations roles can use every view, CSV export, message draft and action resolution; the viewer role is limited to the overview and subscriber list with read-only subscriber details.",
+    "Hash-based client-side routing: the sign-in gate and all three app views (overview, subscribers and actions) are sections of index.html, not separate server routes. The server receives only /.",
     "All figures come from bundled demo data in assets/data.js; there are no API calls, databases, third-party network requests, dependencies or build steps. Action resolutions are in-memory only and are not persisted anywhere.",
     "No destructive actions are implemented: the message dialog does not send messages, and CSV export only creates a local download.",
-    "Charts, filtering, sorting, CSV export, message drafting, action resolution and mobile navigation require JavaScript; KPI values and table markup are also present statically.",
+    "Charts, filtering, sorting, CSV export, message drafting, action resolution and mobile navigation require JavaScript; KPI values and table markup are also present statically, but the app shell stays hidden until the session check runs.",
     "The repository has no documented automated test suite; run locally by opening index.html or serving the directory with a static file server."
   ]
 }
