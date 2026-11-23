@@ -41,6 +41,10 @@
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="7" r="2.6"/><path d="M3.4 16c.5-2.6 2.4-4.1 4.6-4.1s4.1 1.5 4.6 4.1"/><path d="M13.1 4.7a2.6 2.6 0 0 1 0 4.8M14.8 12.2c1.2.5 2.1 1.8 2.4 3.8"/></svg>
           Aboneler
         </a>
+        <a class="nav-item" href="#aksiyonlar" data-nav="actions">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5h12M4 10h8M4 13.5h5"/><circle cx="15" cy="13.5" r="2.5"/></svg>
+          Aksiyonlar
+        </a>
       </nav>
 
       <div class="sidebar-foot">
@@ -281,6 +285,68 @@
             <button class="row-action" type="button" id="clear-filters">Filtreyi temizle</button>
           </div>
         </section>
+
+        <section class="view" id="view-actions" aria-labelledby="actions-title" hidden>
+          <div class="title-row subs-title">
+            <div>
+              <h1 id="actions-title">Aksiyonlar</h1>
+              <p class="view-sub">Teslimat, ödeme ve geri kazanım kuyruğu; telafi veya çözüm kaydı ile kapatılır.</p>
+            </div>
+            <div class="title-actions">
+              <p class="stamp" id="actions-pending-summary">11 bekleyen aksiyon</p>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="chips" role="group" aria-label="Kategori filtresi">
+              <button class="chip action-chip" type="button" data-action-cat="all" aria-pressed="true">Tümü <span class="count">12</span></button>
+              <button class="chip action-chip" type="button" data-action-cat="teslimat" aria-pressed="false">Teslimat <span class="count">4</span></button>
+              <button class="chip action-chip" type="button" data-action-cat="odeme" aria-pressed="false">Ödeme <span class="count">3</span></button>
+              <button class="chip action-chip" type="button" data-action-cat="geri-kazanim" aria-pressed="false">Geri kazanım <span class="count">5</span></button>
+            </div>
+            <span class="spacer"></span>
+            <label class="sr-only" for="action-status">Durum filtresi</label>
+            <select class="select" id="action-status">
+              <option value="all">Tüm durumlar</option>
+              <option value="pending">Bekleyenler</option>
+              <option value="resolved">Çözülenler</option>
+            </select>
+          </div>
+
+          <p class="result-count" id="action-count" aria-live="polite">12 aksiyon</p>
+
+          <div class="table-wrap" id="actions-table-wrap">
+            <table class="subs-table actions-table">
+              <colgroup>
+                <col style="width:24%">
+                <col style="width:13%">
+                <col>
+                <col style="width:12%">
+                <col style="width:11%">
+                <col style="width:16%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th scope="col">Abone</th>
+                  <th scope="col">Kategori</th>
+                  <th scope="col">Sinyal / Çözüm</th>
+                  <th scope="col">Durum</th>
+                  <th scope="col" class="n">Hedef</th>
+                  <th scope="col"><span class="sr-only">İşlem</span></th>
+                </tr>
+              </thead>
+              <tbody id="actions-body"></tbody>
+            </table>
+          </div>
+
+          <div class="subs-cards" id="actions-cards"></div>
+
+          <div class="empty-state" id="actions-empty" hidden>
+            <strong>Seçili filtrede aksiyon yok.</strong>
+            <span>Tüm kategorileri ve durumları görmek için filtreyi sıfırlayabilirsin.</span>
+            <button class="row-action" type="button" id="clear-action-filters">Filtreyi temizle</button>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -358,6 +424,55 @@
       </div>
       <p class="dialog-hint">Risk skoru 35 ve üzeri aboneler riskli listesinde izlenir; detaylar demo verisinden gelir.</p>
     </div>
+  </dialog>
+
+  <dialog class="modal-dialog" id="action-dialog" aria-labelledby="action-modal-title" aria-describedby="action-modal-hint">
+    <form class="modal-inner" id="action-form" method="dialog">
+      <header class="dialog-head">
+        <div>
+          <h2 id="action-modal-title">Aksiyon kaydı</h2>
+          <p class="meta" id="action-modal-meta">Teslimat ve geri kazanım · operasyon</p>
+        </div>
+        <button class="icon-btn" id="action-close" type="button" aria-label="Aksiyon penceresini kapat">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </header>
+
+      <div class="msg-context action-context">
+        <div class="action-context-top">
+          <p class="who" id="action-who"></p>
+          <span class="pill" id="action-pill"></span>
+        </div>
+        <p class="meta" id="action-plan"></p>
+        <p class="signal" id="action-signal"></p>
+      </div>
+
+      <div class="modal-fields">
+        <div class="modal-field">
+          <label for="action-type">Telafi / çözüm tipi</label>
+          <select class="select" id="action-type" required>
+            <option value="Ücretsiz telafi kutusu gönder">Ücretsiz telafi kutusu gönder</option>
+            <option value="Ödemeyi 7 gün ertele">Ödemeyi 7 gün ertele</option>
+            <option value="Adres / teslimat saatini güncelle">Adres / teslimat saatini güncelle</option>
+            <option value="1 ay %20 geri kazanım indirimi">1 ay %20 geri kazanım indirimi</option>
+            <option value="Plan değişikliği (Keşif)">Plan değişikliği (Keşif)</option>
+            <option value="Birebir arama ile çözüldü">Birebir arama ile çözüldü</option>
+          </select>
+        </div>
+
+        <div class="modal-field">
+          <label for="action-note">Operasyon notu</label>
+          <textarea id="action-note" rows="4" placeholder="Örn. 24 Kasım partisine telafi kutusu eklendi, kargo takip kodu paylaşıldı." spellcheck="false"></textarea>
+        </div>
+      </div>
+
+      <div class="dialog-actions modal-actions">
+        <button class="btn" id="action-to-message" type="button">Mesaj hazırla</button>
+        <button class="btn" id="action-reopen" type="button" hidden>Yeniden aç</button>
+        <button class="btn primary" id="action-save" type="submit">Çözüldü olarak kaydet</button>
+      </div>
+      <p class="dialog-hint" id="action-modal-hint">Bu demo yalnızca oturum içi durumu günceller; sayfa yenilendiğinde sıfırlanır.</p>
+    </form>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

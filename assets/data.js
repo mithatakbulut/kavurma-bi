@@ -186,6 +186,21 @@
     }
   ];
 
+  const actions = [
+    { id: 'AK-201', customerId: 'KV-1042', category: 'geri-kazanim', categoryLabel: 'Geri kazanım', due: '2026-11-23', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-202', customerId: 'KV-1087', category: 'odeme', categoryLabel: 'Ödeme', due: '2026-11-23', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-203', customerId: 'KV-0921', category: 'geri-kazanim', categoryLabel: 'Geri kazanım', due: '2026-11-24', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-204', customerId: 'KV-1164', category: 'teslimat', categoryLabel: 'Teslimat', due: '2026-11-23', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-205', customerId: 'KV-1203', category: 'teslimat', categoryLabel: 'Teslimat', due: '2026-11-24', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-206', customerId: 'KV-0998', category: 'geri-kazanim', categoryLabel: 'Geri kazanım', due: '2026-11-25', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-207', customerId: 'KV-1240', category: 'teslimat', categoryLabel: 'Teslimat', due: '2026-11-23', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-208', customerId: 'KV-0864', category: 'odeme', categoryLabel: 'Ödeme', due: '2026-11-24', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-209', customerId: 'KV-1311', category: 'odeme', categoryLabel: 'Ödeme', due: '2026-11-26', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-210', customerId: 'KV-1055', category: 'teslimat', categoryLabel: 'Teslimat', due: '2026-11-24', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-211', customerId: 'KV-1188', category: 'geri-kazanim', categoryLabel: 'Geri kazanım', due: '2026-11-27', status: 'pending', resolution: '', note: '' },
+    { id: 'AK-212', customerId: 'KV-1012', category: 'geri-kazanim', categoryLabel: 'Geri kazanım', due: '2026-11-22', status: 'resolved', resolution: 'Birebir arama ile çözüldü', note: 'Yeni kargo takip bağlantısı paylaşıldı.' }
+  ];
+
   const sum = (rows, key) => rows.reduce((total, row) => total + row[key], 0);
   const net = (rows) => sum(rows, 'joined') - sum(rows, 'cancelled');
   const last4 = weeks.slice(-4);
@@ -193,6 +208,7 @@
   const totalMrr = plans.reduce((total, plan) => total + plan.price * plan.subscribers, 0);
   const totalSubs = sum(plans, 'subscribers');
   const atRisk = customers.filter((customer) => customer.risk >= 35);
+  const customerIds = new Set(customers.map((customer) => customer.id));
 
   console.assert(totalSubs === snapshot.activeSubscribers, 'plan counts must add to active subscribers');
   console.assert(totalMrr === snapshot.mrr, 'plan revenue must add to MRR');
@@ -207,9 +223,10 @@
   console.assert(customers.length === 24, 'the list holds 24 subscribers');
   console.assert(customers.every((c) => c.lastBox <= snapshot.date), 'last box dates are in the past');
   console.assert(weeks.every((w, i) => i === 0 || w.start > weeks[i - 1].start), 'weeks are in order');
+  console.assert(actions.every((a) => customerIds.has(a.customerId)), 'every action must reference an existing customer');
 
   window.KAVURMA = {
-    snapshot, weeks, plans, channels, roast, customers,
+    snapshot, weeks, plans, channels, roast, customers, actions,
     atRisk,
     totals: {
       totalMrr, totalSubs,
