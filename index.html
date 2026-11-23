@@ -226,7 +226,10 @@
             <select class="select" id="sub-sort">
               <option value="risk">Risk skoruna göre</option>
               <option value="name">İsme göre</option>
+              <option value="plan">Plana göre</option>
               <option value="months">Üyelik süresine göre</option>
+              <option value="lastBox">Son kutuya göre</option>
+              <option value="signal">Sinyale göre</option>
             </select>
           </div>
 
@@ -245,12 +248,24 @@
               </colgroup>
               <thead>
                 <tr>
-                  <th scope="col">Abone</th>
-                  <th scope="col">Plan</th>
-                  <th scope="col" class="n tenure-col">Üyelik</th>
-                  <th scope="col" class="n last-col">Son kutu</th>
-                  <th scope="col">Sinyal</th>
-                  <th scope="col" class="n">Risk</th>
+                  <th scope="col" aria-sort="none">
+                    <button class="th-sort" type="button" data-sort-key="name">Abone<svg class="sort-icon" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5v6.5M2.4 5.4 5 8l2.6-2.6"/></svg></button>
+                  </th>
+                  <th scope="col" aria-sort="none">
+                    <button class="th-sort" type="button" data-sort-key="plan">Plan<svg class="sort-icon" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5v6.5M2.4 5.4 5 8l2.6-2.6"/></svg></button>
+                  </th>
+                  <th scope="col" class="n tenure-col" aria-sort="none">
+                    <button class="th-sort" type="button" data-sort-key="months">Üyelik<svg class="sort-icon" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5v6.5M2.4 5.4 5 8l2.6-2.6"/></svg></button>
+                  </th>
+                  <th scope="col" class="n last-col" aria-sort="none">
+                    <button class="th-sort" type="button" data-sort-key="lastBox">Son kutu<svg class="sort-icon" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5v6.5M2.4 5.4 5 8l2.6-2.6"/></svg></button>
+                  </th>
+                  <th scope="col" aria-sort="none">
+                    <button class="th-sort" type="button" data-sort-key="signal">Sinyal<svg class="sort-icon" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5v6.5M2.4 5.4 5 8l2.6-2.6"/></svg></button>
+                  </th>
+                  <th scope="col" class="n" aria-sort="none">
+                    <button class="th-sort" type="button" data-sort-key="risk">Risk<svg class="sort-icon" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 1.5v6.5M2.4 5.4 5 8l2.6-2.6"/></svg></button>
+                  </th>
                   <th scope="col"><span class="sr-only">Mesaj</span></th>
                 </tr>
               </thead>
