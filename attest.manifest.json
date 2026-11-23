@@ -1,0 +1,178 @@
+{
+  "manifestVersion": 1,
+  "application": {
+    "name": "Kavurma",
+    "description": "Static BI dashboard demo for Kavurma Roasters, a fictional Istanbul coffee roaster. It tracks subscription health: growth and churn, plan mix, weekly roast capacity, acquisition channels, and at-risk subscribers.",
+    "framework": "Static HTML, CSS and vanilla JavaScript (no build step)"
+  },
+  "routes": [
+    {
+      "id": "overview",
+      "path": "/#genel-bakis",
+      "description": "Subscription health overview with a headline finding, four KPIs (MRR, active subscribers, new subscribers, monthly churn), a weekly joins/cancellations chart, plan distribution, roast capacity, the top at-risk subscribers, and acquisition channels.",
+      "feature": "subscription-health",
+      "files": [
+        "index.html",
+        "assets/app.js",
+        "assets/data.js",
+        "assets/charts.js"
+      ],
+      "notes": [
+        "Default view: an empty hash or an unrecognized hash renders this view; the canonical deep link is /#genel-bakis.",
+        "The subscriber-flow chart can be switched between 4, 8 and 13 weeks.",
+        "The at-risk preview shows four at-risk subscribers and links to /#aboneler?filter=risk."
+      ]
+    },
+    {
+      "id": "subscribers",
+      "path": "/#aboneler",
+      "description": "Full subscriber list with name, ID, plan, tenure, last box date, signal and risk score. Supports text search, all/risky/healthy filters, sorting, and opening a per-subscriber message draft.",
+      "feature": "subscriber-management",
+      "files": [
+        "index.html",
+        "assets/app.js",
+        "assets/data.js"
+      ],
+      "notes": [
+        "Supported hash query parameters: filter=all|risk|healthy and q=<search text>; invalid filter values fall back to all.",
+        "A subscriber is classified as risky when the risk score is 35 or higher.",
+        "Search matches name, subscriber ID, plan and signal, using Turkish-aware case and diacritic folding.",
+        "Sort order is UI state only and is not stored in the URL.",
+        "Message drafting opens a <dialog> overlay; it is not a separate route."
+      ]
+    },
+    {
+      "id": "actions",
+      "path": "/#aksiyonlar",
+      "feature": "action-queue",
+      "description": "Operations queue for delivery, payment and win-back actions tied to at-risk subscribers, with category chips, a status filter, a resolution modal (compensation type plus operations note, mark resolved or reopen) and a handoff to the subscriber message draft.",
+      "files": [
+        "index.html",
+        "assets/app.js",
+        "assets/data.js",
+        "assets/app.css"
+      ],
+      "notes": [
+        "Hash route: the server receives only /; the canonical deep link is /#aksiyonlar.",
+        "Category filter values are all|teslimat|odeme|geri-kazanim; status filter values are all|pending|resolved.",
+        "Resolving or reopening an action updates only in-memory demo state and resets on reload.",
+        "The row action button opens the resolution modal, while the row itself opens the subscriber drawer."
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "review-subscription-health",
+      "description": "Open the overview and read the headline finding, KPIs, weekly subscriber flow, plan mix, roast capacity, at-risk preview and acquisition channels; switch the flow chart between 4, 8 and 13 weeks.",
+      "routeIds": [
+        "overview"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled for chart rendering and period switching"
+      ],
+      "testDataRequirements": [
+        "Bundled demo data in assets/data.js (snapshot dated 2026-11-22, amounts in TRY)"
+      ]
+    },
+    {
+      "id": "reach-at-risk-subscribers",
+      "description": "Follow the at-risk call-to-action from the overview to the subscriber list filtered to risky subscribers, then review their signals, tenure and risk scores.",
+      "routeIds": [
+        "overview",
+        "subscribers"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled"
+      ],
+      "testDataRequirements": [
+        "At least one subscriber with risk score >= 35 (12 in the bundled demo data)"
+      ]
+    },
+    {
+      "id": "search-filter-sort-subscribers",
+      "description": "Search the subscriber list by name, ID, plan or signal; filter by all, risky or healthy; sort by risk score, name or tenure; and clear filters from the empty state.",
+      "routeIds": [
+        "subscribers"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled"
+      ],
+      "testDataRequirements": [
+        "Bundled demo data with 24 subscribers and a risk threshold of 35"
+      ]
+    },
+    {
+      "id": "draft-and-share-subscriber-message",
+      "description": "Open a subscriber's message draft from an at-risk preview row or from the subscriber table/cards, edit the text, then copy it to the clipboard or open it in an email client via a mailto link. The app does not send the message.",
+      "routeIds": [
+        "overview",
+        "subscribers"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled",
+        "For the email action, an operating-system or browser handler for mailto: links"
+      ],
+      "destructive": false,
+      "externalDependencies": [
+        "Browser clipboard API with document.execCommand fallback",
+        "Default email client via mailto: link"
+      ],
+      "testDataRequirements": [
+        "At least one subscriber row or at-risk preview row; some bundled subscribers have prewritten drafts and others use a generic template"
+      ]
+    },
+    {
+      "id": "export-subscriber-csv",
+      "description": "Use the topbar CSV button to download one semicolon-delimited UTF-8 file containing the weekly joins/cancellations and the complete subscriber list.",
+      "routeIds": [
+        "overview",
+        "subscribers"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled",
+        "The browser permits local file downloads"
+      ],
+      "externalDependencies": [
+        "Browser download via Blob and object URL (no network request)"
+      ],
+      "testDataRequirements": [
+        "Bundled demo data in assets/data.js"
+      ]
+    },
+    {
+      "id": "resolve-customer-action",
+      "description": "Open an action from the operations queue, choose a compensation or resolution type, add an operations note, save it as resolved, reopen it, or hand it off to the subscriber message draft.",
+      "routeIds": [
+        "actions",
+        "subscribers"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled"
+      ],
+      "testDataRequirements": [
+        "12 bundled action rows in assets/data.js (11 pending, 1 resolved)"
+      ]
+    },
+    {
+      "id": "navigate-between-views",
+      "description": "Move between the overview, the subscriber list and the actions queue using the sidebar links or the mobile menu; the hash, active navigation item, breadcrumb, page title and visible view update.",
+      "routeIds": [
+        "overview",
+        "subscribers",
+        "actions"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled for view switching",
+        "The mobile menu is used at viewport widths below 861px"
+      ]
+    }
+  ],
+  "notes": [
+    "Hash-based client-side routing: all three views (overview, subscribers and actions) are sections of index.html, not separate server routes. The server receives only /.",
+    "No authentication, authorization, user accounts or roles are implemented. The sidebar user and all subscriber identities are static, fictional demo content.",
+    "All figures come from bundled demo data in assets/data.js; there are no API calls, databases, third-party network requests, dependencies or build steps. Action resolutions are in-memory only and are not persisted anywhere.",
+    "No destructive actions are implemented: the message dialog does not send messages, and CSV export only creates a local download.",
+    "Charts, filtering, sorting, CSV export, message drafting, action resolution and mobile navigation require JavaScript; KPI values and table markup are also present statically.",
+    "The repository has no documented automated test suite; run locally by opening index.html or serving the directory with a static file server."
+  ]
+}
