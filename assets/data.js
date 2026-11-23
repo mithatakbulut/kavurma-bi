@@ -201,6 +201,23 @@
     { id: 'AK-212', customerId: 'KV-1012', category: 'geri-kazanim', categoryLabel: 'Geri kazanım', due: '2026-11-22', status: 'resolved', resolution: 'Birebir arama ile çözüldü', note: 'Yeni kargo takip bağlantısı paylaşıldı.' }
   ];
 
+  // Demo sign-in accounts. These are mock credentials for the static demo, not
+  // real users: they are shown on the sign-in card and checked in the browser.
+  const users = [
+    {
+      email: 'admin@kavurma.co', password: 'Kavurma!Admin1', role: 'admin',
+      roleLabel: 'Yönetici', name: 'Elif Demir', title: 'Operasyon'
+    },
+    {
+      email: 'ops@kavurma.co', password: 'Kavurma!Ops1', role: 'operations',
+      roleLabel: 'Operasyon', name: 'Deniz Acar', title: 'Operasyon'
+    },
+    {
+      email: 'viewer@kavurma.co', password: 'Kavurma!Viewer1', role: 'viewer',
+      roleLabel: 'İzleyici', name: 'Ece Yılmaz', title: 'İzleyici'
+    }
+  ];
+
   const sum = (rows, key) => rows.reduce((total, row) => total + row[key], 0);
   const net = (rows) => sum(rows, 'joined') - sum(rows, 'cancelled');
   const last4 = weeks.slice(-4);
@@ -224,10 +241,16 @@
   console.assert(customers.every((c) => c.lastBox <= snapshot.date), 'last box dates are in the past');
   console.assert(weeks.every((w, i) => i === 0 || w.start > weeks[i - 1].start), 'weeks are in order');
   console.assert(actions.every((a) => customerIds.has(a.customerId)), 'every action must reference an existing customer');
+  console.assert(users.length === 3, 'there must be three demo sign-in accounts');
+  console.assert(new Set(users.map((user) => user.role)).size === 3, 'demo accounts must cover all three roles');
 
   window.KAVURMA = {
     snapshot, weeks, plans, channels, roast, customers, actions,
     atRisk,
+    auth: {
+      sessionKey: 'kavurma.session',
+      users
+    },
     totals: {
       totalMrr, totalSubs,
       last4: { joined: sum(last4, 'joined'), cancelled: sum(last4, 'cancelled'), net: net(last4) },

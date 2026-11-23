@@ -10,11 +10,85 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/fonts.css">
   <link rel="stylesheet" href="assets/app.css">
+  <script>
+    // Resolve the first view before paint so protected content never flashes.
+    // The session is a mock record written by app.js after demo sign-in.
+    (() => {
+      let signedIn = false;
+      try { signedIn = Boolean(sessionStorage.getItem('kavurma.session')); } catch { signedIn = false; }
+      if (!signedIn && location.hash !== '#giris') {
+        try {
+          history.replaceState(null, '', '#giris');
+        } catch {
+          location.hash = '#giris';
+        }
+      }
+      document.documentElement.dataset.auth = signedIn ? 'in' : 'out';
+    })();
+  </script>
 </head>
 <body>
-  <a class="skip-link" href="#main">İçeriğe geç</a>
+  <a class="skip-link" id="skip-link" href="#main">İçeriğe geç</a>
 
-  <div class="app">
+  <section class="auth" id="auth-view" aria-labelledby="auth-title" hidden>
+    <div class="auth-frame">
+      <header class="auth-brand">
+        <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <ellipse cx="12" cy="12" rx="7.2" ry="9.6" transform="rotate(34 12 12)" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M8.4 6.6c3.2 1.3 4.1 4.5 2.5 7.1-1.1 1.8-1.2 3.7-.4 5.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <span class="brand-name">Kavurma</span>
+          <span class="brand-scope">Kadıköy · İstanbul</span>
+        </div>
+        <span class="auth-badge">Demo</span>
+      </header>
+
+      <div class="auth-sheet">
+        <div class="auth-intro">
+          <p class="auth-kicker">Demo girişi</p>
+          <h1 id="auth-title">Abonelik panosuna giriş</h1>
+          <p class="auth-lead">Kavurma Roasters için hazırlanmış statik bir demo. Giriş bilgileri yalnızca tarayıcıda kontrol edilir; sunucu, gerçek kullanıcı hesabı veya şifre doğrulaması yoktur.</p>
+
+          <div class="demo-accounts">
+            <div class="demo-head">
+              <h2>Demo hesapları</h2>
+              <span>Doldurmak için bir hesap seç</span>
+            </div>
+            <ul class="demo-list" id="demo-list"></ul>
+          </div>
+        </div>
+
+        <form class="auth-form" id="signin-form" novalidate>
+          <div class="auth-form-head">
+            <h2>Giriş yap</h2>
+            <p>Rolüne göre pano görünümü açılır.</p>
+          </div>
+
+          <div class="auth-field">
+            <label for="auth-email">E-posta</label>
+            <input id="auth-email" name="email" type="email" inputmode="email" autocomplete="username" spellcheck="false" required aria-describedby="auth-error">
+          </div>
+
+          <div class="auth-field">
+            <div class="auth-label-row">
+              <label for="auth-password">Şifre</label>
+              <button class="auth-reveal" id="auth-reveal" type="button" aria-pressed="false" aria-controls="auth-password">Göster</button>
+            </div>
+            <input id="auth-password" name="password" type="password" autocomplete="current-password" required aria-describedby="auth-error">
+          </div>
+
+          <p class="auth-error" id="auth-error" role="alert" hidden></p>
+          <button class="btn primary auth-submit" type="submit">Giriş yap</button>
+          <p class="auth-hint">Oturum yalnızca bu sekmede, <code>sessionStorage</code> içinde tutulur. Sekmeyi kapatınca kapanır.</p>
+        </form>
+      </div>
+
+      <p class="auth-foot">Kavurma Roasters · demo verisi · gerçek müşteri bilgisi içermez</p>
+    </div>
+  </section>
+
+  <div class="app" id="app" hidden>
     <aside class="sidebar" id="sidebar" aria-label="Ana gezinme">
       <button class="sidebar-close" id="sidebar-close" type="button" aria-label="Menüyü kapat">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
@@ -49,12 +123,16 @@
 
       <div class="sidebar-foot">
         <div class="user">
-          <span class="avatar lg" aria-hidden="true">ED</span>
-          <div>
-            <strong>Elif Demir</strong>
-            <span>Operasyon</span>
+          <span class="avatar lg" id="user-avatar" aria-hidden="true">ED</span>
+          <div class="user-copy">
+            <strong id="user-name">Elif Demir</strong>
+            <span id="user-title">Operasyon</span>
           </div>
         </div>
+        <button class="signout" id="signout" type="button">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6V4.5A1.5 1.5 0 0 0 10.5 3h-5A1.5 1.5 0 0 0 4 4.5v11A1.5 1.5 0 0 0 5.5 17h5a1.5 1.5 0 0 0 1.5-1.5V14"/><path d="M8.5 10h8M14 7.5l2.5 2.5-2.5 2.5"/></svg>
+          Çıkış yap
+        </button>
       </div>
     </aside>
 
@@ -90,7 +168,7 @@
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v7M5 7l3 3 3-3M2.5 11.5v1.2a.8.8 0 0 0 .8.8h9.4a.8.8 0 0 0 .8-.8v-1.2"/></svg>
             <span class="export-text">CSV indir</span>
           </button>
-          <span class="avatar" role="img" aria-label="Elif Demir">ED</span>
+          <span class="avatar" id="topbar-avatar" role="img" aria-label="Elif Demir">ED</span>
         </div>
       </header>
 

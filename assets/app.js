@@ -53,6 +53,36 @@
 
   if (!D) return;
 
+  /* ---------- mock auth: demo accounts, session and role policy ---------- */
+  const AUTH = D.auth || { users: [], sessionKey: 'kavurma.session' };
+  const SESSION_KEY = AUTH.sessionKey;
+  const ACTOR_ROLES = ['admin', 'operations'];
+  const ROLE_VIEWS = {
+    admin: ['overview', 'subscribers', 'actions'],
+    operations: ['overview', 'subscribers', 'actions'],
+    viewer: ['overview', 'subscribers']
+  };
+
+  const readSession = () => {
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const valid = parsed
+        && ROLE_VIEWS[parsed.role]
+        && [parsed.email, parsed.name, parsed.title].every((value) => typeof value === 'string');
+      if (!valid) throw new Error('invalid demo session');
+      return { email: parsed.email, role: parsed.role, name: parsed.name, title: parsed.title };
+    } catch {
+      try { sessionStorage.removeItem(SESSION_KEY); } catch { /* storage may be unavailable */ }
+      return null;
+    }
+  };
+
+  let session = readSession();
+  const canAct = () => Boolean(session) && ACTOR_ROLES.includes(session.role);
+  const canView = (view) => Boolean(session) && ROLE_VIEWS[session.role].includes(view);
+
   /* ---------- static facts, computed once ---------- */
   const totals = D.totals;
   const mrrDelta = D.snapshot.mrr - D.snapshot.priorMrr;
@@ -110,8 +140,10 @@
     return rows;
   };
 
-  const messageButton = (customer) =>
-    `<button class="row-action" type="button" data-message="${esc(customer.id)}" aria-label="${esc(customer.name)} için mesaj hazırla">Mesaj</button>`;
+  const messageButton = (customer) => {
+    if (!canAct()) return '';
+    return `<button class="row-action" type="button" data-message="${esc(customer.id)}" aria-label="${esc(customer.name)} için mesaj hazırla">Mesaj</button>`;
+  };
 
   // The name is a real button so the drawer opens from the keyboard; the row
   // itself is clickable too, for the rest of the line.
@@ -175,11 +207,11 @@
   document.addEventListener('click', (event) => {
     const msgButton = event.target.closest('[data-message]');
     if (msgButton) {
-      openMessage(msgButton.dataset.message);
+      if (canAct()) openMessage(msgButton.dataset.message);
       return;
     }
     const actionButton = event.target.closest('[data-action-modal]');
-    if (actionButton) openActionModal(actionButton.dataset.actionModal, actionButton);
+    if (actionButton && canAct()) openActionModal(actionButton.dataset.actionModal, actionButton);
   });
 
   /* ---------- actions queue ---------- */
@@ -298,16 +330,20 @@
   $('#roast-meta').textContent = fmtNextRoast(D.roast.nextRoast);
 
   /* ---------- risk preview ---------- */
-  $('#risk-rows').innerHTML = riskCustomers.slice(0, 4).map((customer) => `
-    <div class="risk-row" data-open="${esc(customer.id)}">
-      <div class="who">
-        ${openButton(customer, `<span class="name">${esc(customer.name)}</span><span class="sub">${esc(customer.plan)} · ${int.format(customer.months)} ay</span>`)}
+  const renderRiskPreview = () => {
+    $('#risk-rows').innerHTML = riskCustomers.slice(0, 4).map((customer) => `
+      <div class="risk-row" data-open="${esc(customer.id)}">
+        <div class="who">
+          ${openButton(customer, `<span class="name">${esc(customer.name)}</span><span class="sub">${esc(customer.plan)} · ${int.format(customer.months)} ay</span>`)}
+        </div>
+        <span class="signal" title="${esc(customer.signal)}">${esc(customer.signal)}</span>
+        <span class="risk-rank">${int.format(customer.risk)}</span>
+        ${messageButton(customer)}
       </div>
-      <span class="signal" title="${esc(customer.signal)}">${esc(customer.signal)}</span>
-      <span class="risk-rank">${int.format(customer.risk)}</span>
-      ${messageButton(customer)}
-    </div>
-  `).join('');
+    `).join('');
+  };
+
+  renderRiskPreview();
 
   /* ---------- channels ---------- */
   const channelMax = Math.max(...D.channels.map((channel) => channel.value));
@@ -373,6 +409,9 @@
   });
 
   /* ---------- router ---------- */
+  const app = $('#app');
+  const authView = $('#auth-view');
+  const skipLink = $('#skip-link');
   const viewOverview = $('#view-overview');
   const viewSubs = $('#view-subscribers');
   const viewActions = $('#view-actions');
@@ -392,6 +431,29 @@
     return { name: name || 'genel-bakis', params: new URLSearchParams(query) };
   };
 
+  const replaceHash = (hash) => {
+    try {
+      history.replaceState(null, '', hash);
+    } catch {
+      location.hash = hash;
+    }
+  };
+
+  const showAuth = () => {
+    app.hidden = true;
+    authView.hidden = false;
+    skipLink.hidden = true;
+    document.title = 'Kavurma · Giriş';
+  };
+
+  const hideAuth = () => {
+    const reveal = app.hidden;
+    authView.hidden = true;
+    app.hidden = false;
+    skipLink.hidden = false;
+    if (reveal) requestAnimationFrame(() => drawFlow(chartWindow));
+  };
+
   const syncHash = () => {
     const params = new URLSearchParams();
     if (state.filter !== 'all') params.set('filter', state.filter);
@@ -405,8 +467,29 @@
   };
 
   const route = () => {
-    const { name, params } = parseHash();
-    const currentView = name === 'aboneler' ? 'subscribers' : name === 'aksiyonlar' ? 'actions' : 'overview';
+    const { name: requested, params } = parseHash();
+    const wasAuth = !authView.hidden;
+
+    if (!session) {
+      if (requested !== 'giris') replaceHash('#giris');
+      showAuth();
+      return;
+    }
+
+    hideAuth();
+    let name = requested;
+    if (name === 'giris') {
+      name = 'genel-bakis';
+      replaceHash('#genel-bakis');
+    }
+
+    let currentView = name === 'aboneler' ? 'subscribers' : name === 'aksiyonlar' ? 'actions' : 'overview';
+    if (!canView(currentView)) {
+      currentView = 'overview';
+      replaceHash('#genel-bakis');
+      showToast('Bu görünüm için yetkiniz yok; genel bakışa yönlendirildiniz.');
+    }
+
     viewOverview.hidden = currentView !== 'overview';
     viewSubs.hidden = currentView !== 'subscribers';
     viewActions.hidden = currentView !== 'actions';
@@ -443,7 +526,7 @@
     const heading = $('h1', activeView);
     if (heading) {
       heading.setAttribute('tabindex', '-1');
-      if (sidebar.contains(document.activeElement) || menuOpen) heading.focus({ preventScroll: true });
+      if (wasAuth || sidebar.contains(document.activeElement) || menuOpen) heading.focus({ preventScroll: true });
     }
     window.scrollTo(0, 0);
   };
@@ -619,6 +702,7 @@
   };
 
   function openMessage(id, returnTo = document.activeElement) {
+    if (!canAct()) return;
     const customer = D.customers.find((row) => row.id === id);
     if (!customer) return;
     currentCustomer = customer;
@@ -671,6 +755,141 @@
       return copied;
     }
   };
+
+  /* ---------- mock sign-in and role-aware chrome ---------- */
+  const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2)
+    .map((part) => part.charAt(0)).join('').toLocaleUpperCase('tr-TR');
+
+  const applyIdentity = (next) => {
+    session = next;
+    const actor = canAct();
+    const actionsLink = $('[data-nav="actions"]');
+    if (actionsLink) actionsLink.hidden = !actor;
+    $$('[data-export]').forEach((button) => { button.hidden = !actor; });
+    $('#drawer-message').hidden = !actor;
+
+    if (next) {
+      const abbr = initials(next.name);
+      $('#user-name').textContent = next.name;
+      $('#user-title').textContent = next.title;
+      $('#user-avatar').textContent = abbr;
+      $('#topbar-avatar').textContent = abbr;
+      $('#topbar-avatar').setAttribute('aria-label', next.name);
+    }
+
+    document.documentElement.dataset.auth = next ? 'in' : 'out';
+    document.body.dataset.role = next ? next.role : 'guest';
+    renderRiskPreview();
+  };
+
+  const authForm = $('#signin-form');
+  const authEmail = $('#auth-email');
+  const authPassword = $('#auth-password');
+  const authError = $('#auth-error');
+  const authReveal = $('#auth-reveal');
+
+  const setAuthError = (message) => {
+    authError.textContent = message;
+    authError.hidden = false;
+    authEmail.setAttribute('aria-invalid', 'true');
+    authPassword.setAttribute('aria-invalid', 'true');
+    authPassword.focus();
+    authPassword.select();
+  };
+
+  const clearAuthError = () => {
+    authError.hidden = true;
+    authError.textContent = '';
+    authEmail.removeAttribute('aria-invalid');
+    authPassword.removeAttribute('aria-invalid');
+  };
+
+  const resetReveal = () => {
+    authPassword.type = 'password';
+    authReveal.setAttribute('aria-pressed', 'false');
+    authReveal.textContent = 'Göster';
+  };
+
+  $('#demo-list').innerHTML = AUTH.users.map((user) => `
+    <li>
+      <button class="demo-account" type="button" data-demo-account="${esc(user.email)}">
+        <span class="demo-top">
+          <span class="demo-name">${esc(user.name)}</span>
+          <span class="pill neutral">${esc(user.roleLabel)}</span>
+        </span>
+        <span class="demo-cred"><span>${esc(user.email)}</span><span>${esc(user.password)}</span></span>
+      </button>
+    </li>
+  `).join('');
+
+  [authEmail, authPassword].forEach((field) => {
+    field.addEventListener('input', () => {
+      if (!authError.hidden) clearAuthError();
+    });
+  });
+
+  authForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const email = authEmail.value.trim().toLowerCase();
+    const password = authPassword.value;
+    const user = AUTH.users.find((candidate) => candidate.email.toLowerCase() === email && candidate.password === password);
+
+    if (!user) {
+      setAuthError('E-posta veya şifre hatalı.');
+      return;
+    }
+
+    clearAuthError();
+    const record = { email: user.email, role: user.role, name: user.name, title: user.title };
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(record));
+    } catch {
+      /* The demo still works in memory when storage is unavailable. */
+    }
+    applyIdentity(record);
+    authForm.reset();
+    resetReveal();
+    if (location.hash === '#genel-bakis') route();
+    else location.hash = '#genel-bakis';
+  });
+
+  $$('[data-demo-account]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const user = AUTH.users.find((candidate) => candidate.email === button.dataset.demoAccount);
+      if (!user) return;
+      authEmail.value = user.email;
+      authPassword.value = user.password;
+      clearAuthError();
+      resetReveal();
+      authPassword.focus();
+    });
+  });
+
+  authReveal.addEventListener('click', () => {
+    const reveal = authPassword.type === 'password';
+    authPassword.type = reveal ? 'text' : 'password';
+    authReveal.setAttribute('aria-pressed', String(reveal));
+    authReveal.textContent = reveal ? 'Gizle' : 'Göster';
+    authPassword.focus();
+  });
+
+  $('#signout').addEventListener('click', () => {
+    try {
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch {
+      /* Nothing to clear when storage is unavailable. */
+    }
+    applyIdentity(null);
+    ['message-dialog', 'subscriber-drawer', 'action-dialog'].forEach((id) => {
+      const node = document.getElementById(id);
+      if (node && node.open) node.close();
+    });
+    authForm.reset();
+    resetReveal();
+    clearAuthError();
+    if (location.hash === '#giris') route();
+    else location.hash = '#giris';
+  });
 
   $('#msg-copy').addEventListener('click', async () => {
     const copied = await copyText(msgBody.value);
@@ -779,7 +998,7 @@
   });
 
   $('#drawer-message').addEventListener('click', () => {
-    if (!drawerCustomer) return;
+    if (!canAct() || !drawerCustomer) return;
     const id = drawerCustomer.id;
     const returnTo = drawerReturn;
     closeDrawer(false);
@@ -820,6 +1039,7 @@
   };
 
   function openActionModal(actionId, returnTo = document.activeElement) {
+    if (!canAct()) return;
     const item = actionRows.find((row) => row.id === actionId);
     const customer = item && customerById.get(item.customerId);
     if (!item || !customer) return;
@@ -862,7 +1082,7 @@
 
   actionForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (!currentAction) return;
+    if (!canAct() || !currentAction) return;
     currentAction.status = 'resolved';
     currentAction.resolution = actionType.value;
     currentAction.note = actionNote.value.trim();
@@ -872,7 +1092,7 @@
   });
 
   actionReopen.addEventListener('click', () => {
-    if (!currentAction) return;
+    if (!canAct() || !currentAction) return;
     currentAction.status = 'pending';
     currentAction.resolution = '';
     currentAction.note = actionNote.value.trim();
@@ -882,7 +1102,7 @@
   });
 
   $('#action-to-message').addEventListener('click', () => {
-    if (!currentAction) return;
+    if (!canAct() || !currentAction) return;
     const customerId = currentAction.customerId;
     const returnTo = actionReturn;
     closeActionModal(false);
@@ -904,6 +1124,7 @@
 
   $$('[data-export]').forEach((button) => {
     button.addEventListener('click', () => {
+      if (!canAct()) return;
       const blob = new Blob([buildCsv()], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -918,5 +1139,6 @@
   });
 
   /* ---------- boot ---------- */
+  applyIdentity(session);
   route();
 })();
