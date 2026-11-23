@@ -83,7 +83,16 @@
   $('#kpi-churn-delta').innerHTML = `<span class="${churnDelta > 0 ? 'neg' : churnDelta < 0 ? 'pos' : ''}">${churnWord}</span> <span class="sep" aria-hidden="true">·</span> <span class="baseline">önceki 4 hafta ${pct.format(totals.priorChurn)}</span>`;
 
   /* ---------- subscribers in view ---------- */
-  const state = { filter: 'all', q: '', sort: 'risk' };
+  const state = { filter: 'all', q: '', sort: 'risk', dir: 'desc' };
+
+  const SORTERS = {
+    name: (a, b) => a.name.localeCompare(b.name, 'tr'),
+    plan: (a, b) => a.plan.localeCompare(b.plan, 'tr'),
+    months: (a, b) => a.months - b.months,
+    lastBox: (a, b) => a.lastBox.localeCompare(b.lastBox),
+    signal: (a, b) => a.signal.localeCompare(b.signal, 'tr'),
+    risk: (a, b) => a.risk - b.risk
+  };
 
   const filteredCustomers = () => {
     let rows = D.customers.slice();
@@ -95,9 +104,9 @@
         customer.name, customer.id, customer.plan, customer.signal
       ].join(' ')).includes(needle));
     }
-    if (state.sort === 'risk') rows.sort((a, b) => b.risk - a.risk || a.name.localeCompare(b.name, 'tr'));
-    if (state.sort === 'name') rows.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
-    if (state.sort === 'months') rows.sort((a, b) => b.months - a.months || a.name.localeCompare(b.name, 'tr'));
+    const sorter = SORTERS[state.sort] || SORTERS.risk;
+    const direction = state.dir === 'asc' ? 1 : -1;
+    rows.sort((a, b) => direction * sorter(a, b) || a.name.localeCompare(b.name, 'tr'));
     return rows;
   };
 
@@ -121,6 +130,12 @@
     });
 
     $('#sub-count').textContent = `${int.format(rows.length)} abone`;
+
+    $$('.th-sort').forEach((button) => {
+      const active = button.dataset.sortKey === state.sort;
+      button.closest('th').setAttribute('aria-sort', active ? (state.dir === 'asc' ? 'ascending' : 'descending') : 'none');
+    });
+    $('#sub-sort').value = state.sort;
 
     $('#subs-body').innerHTML = rows.map((customer) => `
       <tr data-open="${esc(customer.id)}">
@@ -439,7 +454,20 @@
 
   $('#sub-sort').addEventListener('change', (event) => {
     state.sort = event.target.value;
+    state.dir = 'desc';
     renderSubs();
+  });
+
+  $$('.th-sort').forEach((button) => {
+    button.addEventListener('click', () => {
+      const key = button.dataset.sortKey;
+      if (state.sort === key) state.dir = state.dir === 'desc' ? 'asc' : 'desc';
+      else {
+        state.sort = key;
+        state.dir = 'desc';
+      }
+      renderSubs();
+    });
   });
 
   $('#clear-filters').addEventListener('click', () => {
