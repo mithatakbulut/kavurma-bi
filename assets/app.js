@@ -173,9 +173,102 @@
 
   // Delegated once: buttons are re-rendered with the table and the cards.
   document.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-message]');
-    if (button) openMessage(button.dataset.message);
+    const msgButton = event.target.closest('[data-message]');
+    if (msgButton) {
+      openMessage(msgButton.dataset.message);
+      return;
+    }
+    const actionButton = event.target.closest('[data-action-modal]');
+    if (actionButton) openActionModal(actionButton.dataset.actionModal, actionButton);
   });
+
+  /* ---------- actions queue ---------- */
+  const actionState = { category: 'all', status: 'all' };
+  const customerById = new Map(D.customers.map((customer) => [customer.id, customer]));
+  const actionRows = D.actions.map((item) => ({ ...item }));
+
+  const filteredActions = () => {
+    return actionRows.filter((item) => {
+      if (actionState.category !== 'all' && item.category !== actionState.category) return false;
+      if (actionState.status !== 'all' && item.status !== actionState.status) return false;
+      return true;
+    });
+  };
+
+  const actionStatusPill = (status) => status === 'resolved'
+    ? '<span class="pill positive">Çözüldü</span>'
+    : '<span class="pill neutral">Bekliyor</span>';
+
+  const actionButtons = (item, customer) => `
+    <span class="row-actions">
+      <button class="row-action accent" type="button" data-action-modal="${esc(item.id)}">${item.status === 'resolved' ? 'Düzenle' : 'Telafi / Çöz'}</button>
+      ${messageButton(customer)}
+    </span>
+  `;
+
+  const renderActions = () => {
+    const rows = filteredActions();
+    const counts = {
+      all: actionRows.length,
+      teslimat: actionRows.filter((item) => item.category === 'teslimat').length,
+      odeme: actionRows.filter((item) => item.category === 'odeme').length,
+      'geri-kazanim': actionRows.filter((item) => item.category === 'geri-kazanim').length
+    };
+    const pendingTotal = actionRows.filter((item) => item.status === 'pending').length;
+
+    $('#actions-pending-summary').textContent = `${int.format(pendingTotal)} bekleyen aksiyon`;
+    $$('.action-chip').forEach((chip) => {
+      const cat = chip.dataset.actionCat;
+      chip.setAttribute('aria-pressed', String(cat === actionState.category));
+      const count = $('.count', chip);
+      if (count) count.textContent = int.format(counts[cat] ?? 0);
+    });
+    $('#action-status').value = actionState.status;
+    $('#action-count').textContent = `${int.format(rows.length)} aksiyon`;
+
+    $('#actions-body').innerHTML = rows.map((item) => {
+      const customer = customerById.get(item.customerId);
+      if (!customer) return '';
+      const resolutionText = item.resolution
+        ? `<span class="action-signal-sub">${esc(item.resolution)}${item.note ? ` · ${esc(item.note)}` : ''}</span>`
+        : '';
+      return `
+        <tr data-open="${esc(customer.id)}">
+          <td class="name-cell">
+            ${openButton(customer, `<span class="name">${esc(customer.name)}</span><span class="id">${esc(item.id)} · ${esc(customer.plan)}</span>`)}
+          </td>
+          <td>${esc(item.categoryLabel)}</td>
+          <td class="signal-cell"><span title="${esc(customer.signal)}">${esc(customer.signal)}</span>${resolutionText}</td>
+          <td>${actionStatusPill(item.status)}</td>
+          <td class="n">${fmtDay(item.due)}</td>
+          <td class="action-cell">${actionButtons(item, customer)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    $('#actions-cards').innerHTML = rows.map((item) => {
+      const customer = customerById.get(item.customerId);
+      if (!customer) return '';
+      return `
+        <article class="sub-row" data-open="${esc(customer.id)}">
+          <div class="sub-top">
+            ${openButton(customer, `<span class="name">${esc(customer.name)}</span><span class="id">${esc(item.id)} · ${esc(item.categoryLabel)}</span>`)}
+            ${actionStatusPill(item.status)}
+          </div>
+          <p class="sub-meta">${esc(customer.plan)} · hedef ${fmtDay(item.due)}</p>
+          <div class="sub-bottom">
+            <span class="signal">${esc(item.resolution || customer.signal)}</span>
+            ${actionButtons(item, customer)}
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    const empty = rows.length === 0;
+    $('#actions-empty').hidden = !empty;
+    $('#actions-table-wrap').hidden = empty;
+    $('#actions-cards').hidden = empty;
+  };
 
   /* ---------- plan mix ---------- */
   const planShares = D.plans.map((plan) => plan.subscribers / totals.totalSubs);
@@ -282,6 +375,7 @@
   /* ---------- router ---------- */
   const viewOverview = $('#view-overview');
   const viewSubs = $('#view-subscribers');
+  const viewActions = $('#view-actions');
   const navLinks = $$('[data-nav]');
   const crumb = $('#crumb-current');
   const globalSearch = $('#global-q');
@@ -312,29 +406,40 @@
 
   const route = () => {
     const { name, params } = parseHash();
-    const isSubs = name === 'aboneler';
-    viewOverview.hidden = isSubs;
-    viewSubs.hidden = !isSubs;
+    const currentView = name === 'aboneler' ? 'subscribers' : name === 'aksiyonlar' ? 'actions' : 'overview';
+    viewOverview.hidden = currentView !== 'overview';
+    viewSubs.hidden = currentView !== 'subscribers';
+    viewActions.hidden = currentView !== 'actions';
+
     navLinks.forEach((link) => {
-      if (link.dataset.nav === (isSubs ? 'subscribers' : 'overview')) link.setAttribute('aria-current', 'page');
+      if (link.dataset.nav === currentView) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
-    crumb.textContent = isSubs ? 'Aboneler' : 'Genel bakış';
-    document.title = isSubs ? 'Kavurma · Aboneler' : 'Kavurma · Abonelik sağlığı';
 
-    if (isSubs) {
+    const titles = {
+      overview: ['Genel bakış', 'Kavurma · Abonelik sağlığı'],
+      subscribers: ['Aboneler', 'Kavurma · Aboneler'],
+      actions: ['Aksiyonlar', 'Kavurma · Aksiyonlar']
+    };
+    crumb.textContent = titles[currentView][0];
+    document.title = titles[currentView][1];
+
+    if (currentView === 'subscribers') {
       const filter = params.get('filter');
       state.filter = ['all', 'risk', 'healthy'].includes(filter) ? filter : 'all';
       state.q = (params.get('q') || '').slice(0, 80);
       if (document.activeElement !== globalSearch) globalSearch.value = state.q;
       if (document.activeElement !== subSearch) subSearch.value = state.q;
       renderSubs();
+    } else if (currentView === 'actions') {
+      if (document.activeElement !== globalSearch) globalSearch.value = '';
+      renderActions();
     } else {
       if (document.activeElement !== globalSearch) globalSearch.value = '';
     }
 
     closeMenu(false);
-    const activeView = isSubs ? viewSubs : viewOverview;
+    const activeView = currentView === 'subscribers' ? viewSubs : currentView === 'actions' ? viewActions : viewOverview;
     const heading = $('h1', activeView);
     if (heading) {
       heading.setAttribute('tabindex', '-1');
@@ -427,7 +532,7 @@
     if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
     const target = event.target;
     if (target.matches('input, textarea, select, [contenteditable="true"]')) return;
-    if ($('#message-dialog').open) return;
+    if ($('#message-dialog').open || $('#subscriber-drawer').open || $('#action-dialog').open) return;
     const visible = globalSearch.offsetParent !== null ? globalSearch : (subSearch.offsetParent !== null ? subSearch : null);
     if (visible) {
       event.preventDefault();
@@ -444,12 +549,30 @@
   });
 
   /* ---------- filters ---------- */
-  $$('.chip').forEach((chip) => {
+  $$('[data-filter]').forEach((chip) => {
     chip.addEventListener('click', () => {
       state.filter = chip.dataset.filter;
       syncHash();
       renderSubs();
     });
+  });
+
+  $$('.action-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      actionState.category = chip.dataset.actionCat;
+      renderActions();
+    });
+  });
+
+  $('#action-status').addEventListener('change', (event) => {
+    actionState.status = event.target.value;
+    renderActions();
+  });
+
+  $('#clear-action-filters').addEventListener('click', () => {
+    actionState.category = 'all';
+    actionState.status = 'all';
+    renderActions();
   });
 
   $('#sub-sort').addEventListener('change', (event) => {
@@ -645,10 +768,10 @@
     }
   });
 
-  // Rows are clickable, the name inside them is a button. The message action
-  // must not bubble into the drawer.
+  // Rows are clickable, the name inside them is a button. The message and
+  // action modal triggers must not bubble into the drawer.
   document.addEventListener('click', (event) => {
-    if (event.target.closest('[data-message]')) return;
+    if (event.target.closest('[data-message], [data-action-modal]')) return;
     const opener = event.target.closest('[data-open]');
     if (!opener) return;
     const target = opener.matches('button') ? opener : $('.row-open', opener);
@@ -673,6 +796,96 @@
       drawerCopy.textContent = 'E-postayı kopyala';
       drawerCopy.disabled = false;
     }, 2000);
+  });
+
+  /* ---------- action modal ---------- */
+  const actionDialog = $('#action-dialog');
+  const actionForm = $('#action-form');
+  const actionType = $('#action-type');
+  const actionNote = $('#action-note');
+  const actionWho = $('#action-who');
+  const actionPill = $('#action-pill');
+  const actionPlan = $('#action-plan');
+  const actionSignal = $('#action-signal');
+  const actionReopen = $('#action-reopen');
+  const actionSave = $('#action-save');
+  let currentAction = null;
+  let actionReturn = null;
+  let actionRestoreFocus = true;
+
+  const defaultResolution = {
+    teslimat: 'Ücretsiz telafi kutusu gönder',
+    odeme: 'Ödemeyi 7 gün ertele',
+    'geri-kazanim': '1 ay %20 geri kazanım indirimi'
+  };
+
+  function openActionModal(actionId, returnTo = document.activeElement) {
+    const item = actionRows.find((row) => row.id === actionId);
+    const customer = item && customerById.get(item.customerId);
+    if (!item || !customer) return;
+    currentAction = item;
+    actionReturn = returnTo;
+    actionRestoreFocus = true;
+
+    actionWho.textContent = customer.name;
+    actionPill.className = `pill ${item.status === 'resolved' ? 'positive' : 'neutral'}`;
+    actionPill.textContent = item.status === 'resolved' ? 'Çözüldü' : 'Bekliyor';
+    actionPlan.textContent = `${item.id} · ${item.categoryLabel} · ${customer.plan} · hedef ${fmtDay(item.due)}`;
+    actionSignal.textContent = `Sinyal: ${customer.signal}`;
+    actionType.value = item.resolution || defaultResolution[item.category] || 'Birebir arama ile çözüldü';
+    actionNote.value = item.note || '';
+    actionReopen.hidden = item.status !== 'resolved';
+    actionSave.textContent = item.status === 'resolved' ? 'Kaydı güncelle' : 'Çözüldü olarak kaydet';
+
+    if (!actionDialog.open) actionDialog.showModal();
+    actionType.focus();
+  }
+
+  const closeActionModal = (restoreFocus = true) => {
+    actionRestoreFocus = restoreFocus;
+    if (actionDialog.open) actionDialog.close();
+  };
+
+  $('#action-close').addEventListener('click', () => closeActionModal());
+  actionDialog.addEventListener('click', (event) => {
+    if (event.target === actionDialog) closeActionModal();
+  });
+  actionDialog.addEventListener('close', () => {
+    const target = actionReturn;
+    currentAction = null;
+    actionReturn = null;
+    if (actionRestoreFocus && target && document.contains(target) && target.offsetParent !== null) {
+      target.focus();
+    }
+  });
+
+  actionForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!currentAction) return;
+    currentAction.status = 'resolved';
+    currentAction.resolution = actionType.value;
+    currentAction.note = actionNote.value.trim();
+    renderActions();
+    closeActionModal();
+    showToast('Aksiyon çözüldü olarak kaydedildi.');
+  });
+
+  actionReopen.addEventListener('click', () => {
+    if (!currentAction) return;
+    currentAction.status = 'pending';
+    currentAction.resolution = '';
+    currentAction.note = actionNote.value.trim();
+    renderActions();
+    closeActionModal();
+    showToast('Aksiyon yeniden açıldı.');
+  });
+
+  $('#action-to-message').addEventListener('click', () => {
+    if (!currentAction) return;
+    const customerId = currentAction.customerId;
+    const returnTo = actionReturn;
+    closeActionModal(false);
+    openMessage(customerId, returnTo);
   });
 
   /* ---------- CSV ---------- */
