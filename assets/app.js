@@ -831,6 +831,7 @@
     actionPill.className = `pill ${item.status === 'resolved' ? 'positive' : 'neutral'}`;
     actionPill.textContent = item.status === 'resolved' ? 'Çözüldü' : 'Bekliyor';
     actionPlan.textContent = `${item.id} · ${item.categoryLabel} · ${customer.plan} · hedef ${fmtDay(item.due)}`;
+    $('#action-modal-meta').textContent = `${item.categoryLabel} · operasyon`;
     actionSignal.textContent = `Sinyal: ${customer.signal}`;
     actionType.value = item.resolution || defaultResolution[item.category] || 'Birebir arama ile çözüldü';
     actionNote.value = item.note || '';
