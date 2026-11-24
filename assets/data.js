@@ -51,40 +51,6 @@
     origins: 'Etiyopya Guji · Brezilya Fazenda'
   };
 
-  // Weekly roast batches allocated across the active box plan.
-  const roastBatches = [
-    {
-      id: 'KVR-2411-A', origin: 'Etiyopya Guji · Doğal', roastLevel: 'Açık',
-      boxes: 380, kg: 95, status: 'roasted', statusLabel: 'Kavruldu',
-      roastDate: '2026-11-23', note: 'Meyvemsi notalar · nem %11,2'
-    },
-    {
-      id: 'KVR-2411-B', origin: 'Brezilya Fazenda · Yıkanmış', roastLevel: 'Orta',
-      boxes: 460, kg: 115, status: 'roasted', statusLabel: 'Kavruldu',
-      roastDate: '2026-11-23', note: 'Fındık & kakao · Ofis planı ağırlıklı'
-    },
-    {
-      id: 'KVR-2411-C', origin: 'Kolombiya Huila · Yıkanmış', roastLevel: 'Orta',
-      boxes: 310, kg: 78, status: 'packing', statusLabel: 'Paketlemede',
-      roastDate: '2026-11-24', note: '250g valfli poşetlere alınıyor'
-    },
-    {
-      id: 'KVR-2411-D', origin: 'Guatemala Antigua · Yıkanmış', roastLevel: 'Orta',
-      boxes: 244, kg: 61, status: 'packing', statusLabel: 'Paketlemede',
-      roastDate: '2026-11-24', note: 'Tek Menşe kutuları hazırlanıyor'
-    },
-    {
-      id: 'KVR-2411-E', origin: 'Kenya Nyeri · SL28', roastLevel: 'Açık',
-      boxes: 210, kg: 53, status: 'planned', statusLabel: 'Planlandı',
-      roastDate: '2026-11-25', note: '06:00 ilk kazan · 14 dk profil'
-    },
-    {
-      id: 'KVR-2411-F', origin: 'Kosta Rika Tarrazu · Honey', roastLevel: 'Orta-Koyu',
-      boxes: 160, kg: 40, status: 'planned', statusLabel: 'Planlandı',
-      roastDate: '2026-11-25', note: 'Espresso aboneleri için ayrıldı'
-    }
-  ];
-
   const customers = [
     {
       id: 'KV-1042', name: 'Selin Aydın', email: 'selin.aydin@kavurma.co',
@@ -269,7 +235,6 @@
   console.assert(sum(last4, 'cancelled') === 44, 'last four weeks cancelled must be 44');
   console.assert(sum(channels, 'value') === 90, 'channels must add to the joined total');
   console.assert(roast.boxes + roast.skipped === snapshot.activeSubscribers, 'boxes plus skips must equal subscribers');
-  console.assert(sum(roastBatches, 'boxes') === roast.boxes, 'batch boxes must add to weekly roast boxes');
   console.assert(atRisk.length === 12, 'there must be twelve at-risk subscribers');
   console.assert(snapshot.mrr - snapshot.priorMrr === 32076, 'MRR change must match the displayed figures');
   console.assert(customers.length === 24, 'the list holds 24 subscribers');
@@ -280,7 +245,7 @@
   console.assert(new Set(users.map((user) => user.role)).size === 3, 'demo accounts must cover all three roles');
 
   window.KAVURMA = {
-    snapshot, weeks, plans, channels, roast, roastBatches, customers, actions,
+    snapshot, weeks, plans, channels, roast, customers, actions,
     atRisk,
     auth: {
       sessionKey: 'kavurma.session',
