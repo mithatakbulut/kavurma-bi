@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useOutletContext, useSearchParams } from 'react-router-dom';
 import data from '../data.js';
 import { MessageButton, SubscriberOpen } from '../components/SubscriberActions.jsx';
-import { fmtDay, fold, int, RISK_FLOOR } from '../lib/format.js';
+import SubscriberSearch from '../components/SubscriberSearch.jsx';
+import { fmtDay, int, RISK_FLOOR } from '../lib/format.js';
 
 const SORTERS = {
   name: (a, b) => a.name.localeCompare(b.name, 'tr'),
@@ -27,7 +28,6 @@ export default function Subscribers() {
 
   const rawFilter = searchParams.get('filter');
   const filter = FILTERS.includes(rawFilter) ? rawFilter : 'all';
-  const q = (searchParams.get('q') || '').slice(0, 80);
 
   useEffect(() => {
     if (rawFilter && !FILTERS.includes(rawFilter)) {
@@ -41,29 +41,15 @@ export default function Subscribers() {
     let list = data.customers.slice();
     if (filter === 'risk') list = list.filter((customer) => customer.risk >= RISK_FLOOR);
     if (filter === 'healthy') list = list.filter((customer) => customer.risk < RISK_FLOOR);
-    if (q) {
-      const needle = fold(q);
-      list = list.filter((customer) => fold([
-        customer.name, customer.id, customer.plan, customer.signal
-      ].join(' ')).includes(needle));
-    }
     const sorter = SORTERS[sort] || SORTERS.risk;
     const direction = dir === 'asc' ? 1 : -1;
     return list.sort((a, b) => direction * sorter(a, b) || a.name.localeCompare(b.name, 'tr'));
-  }, [filter, q, sort, dir]);
+  }, [filter, sort, dir]);
 
   const counts = {
     all: data.customers.length,
     risk: riskCustomers.length,
     healthy: healthyCustomers.length
-  };
-
-  const updateQuery = (value) => {
-    const next = new URLSearchParams(searchParams);
-    const clean = value.slice(0, 80);
-    if (clean) next.set('q', clean);
-    else next.delete('q');
-    setSearchParams(next, { replace: true });
   };
 
   const setFilter = (next) => {
@@ -117,21 +103,11 @@ export default function Subscribers() {
       </div>
 
       <div className="toolbar">
-        <div className="field-search">
-          <label className="sr-only" htmlFor="sub-q">Abone ara</label>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="m10.5 10.5 3 3" /></svg>
-          <input
-            id="sub-q"
-            ref={searchRef}
-            type="search"
-            placeholder="İsim veya sinyal ara"
-            autoComplete="off"
-            spellCheck="false"
-            data-search-input
-            value={q}
-            onChange={(event) => updateQuery(event.target.value)}
-          />
-        </div>
+        <SubscriberSearch
+          inputRef={searchRef}
+          onSelect={openDrawer}
+          placeholder="İsim veya sinyal ara"
+        />
         <div className="chips" role="group" aria-label="Abone filtresi">
           {FILTERS.map((key) => (
             <button

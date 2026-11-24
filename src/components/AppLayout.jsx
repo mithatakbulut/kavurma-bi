@@ -7,6 +7,7 @@ import { downloadCsv, initials } from '../lib/format.js';
 import BrandMark from './BrandMark.jsx';
 import MessageDialog from './MessageDialog.jsx';
 import SubscriberDrawer from './SubscriberDrawer.jsx';
+import SubscriberSearch from './SubscriberSearch.jsx';
 import ActionDialog from './ActionDialog.jsx';
 
 const PAGE_META = {
@@ -81,7 +82,6 @@ export default function AppLayout() {
   const [drawerId, setDrawerId] = useState(null);
   const [actionId, setActionId] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [globalQ, setGlobalQ] = useState('');
 
   const overlayReturn = useRef(null);
   const sidebarRef = useRef(null);
@@ -90,9 +90,6 @@ export default function AppLayout() {
 
   const pathKey = location.pathname.replace(/\/+$/, '') || '/';
   const meta = PAGE_META[pathKey] || PAGE_META['/genel-bakis'];
-  const onSubscribers = pathKey === '/aboneler';
-  const searchParams = new URLSearchParams(location.search);
-  const searchValue = onSubscribers ? (searchParams.get('q') || '') : globalQ;
 
   useEffect(() => {
     document.title = meta.title;
@@ -106,10 +103,6 @@ export default function AppLayout() {
       heading.setAttribute('tabindex', '-1');
       heading.focus({ preventScroll: true });
     }
-  }, [location.pathname]);
-
-  useEffect(() => {
-    setGlobalQ('');
   }, [location.pathname]);
 
   useEffect(() => {
@@ -245,29 +238,6 @@ export default function AppLayout() {
     showToast('Aksiyon yeniden açıldı.');
   };
 
-  const updateSearch = (value) => {
-    const clean = value.slice(0, 80);
-    if (onSubscribers) {
-      const next = new URLSearchParams(location.search);
-      if (clean) next.set('q', clean);
-      else next.delete('q');
-      navigate(`/aboneler${next.toString() ? `?${next}` : ''}`, { replace: true });
-    } else {
-      setGlobalQ(clean);
-    }
-  };
-
-  const submitSearch = (event) => {
-    event.preventDefault();
-    const query = searchValue.trim().slice(0, 80);
-    if (onSubscribers) {
-      updateSearch(query);
-    } else {
-      setGlobalQ(query);
-      navigate(`/aboneler${query ? `?q=${encodeURIComponent(query)}` : ''}`);
-    }
-  };
-
   const handleExport = () => {
     if (!canAct) return;
     downloadCsv();
@@ -373,27 +343,7 @@ export default function AppLayout() {
               <span className="current">{meta.crumb}</span>
             </nav>
 
-            <form className="search" role="search" onSubmit={submitSearch}>
-              <label className="sr-only" htmlFor="global-q">Abone ara</label>
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="m10.5 10.5 3 3" /></svg>
-              <input
-                id="global-q"
-                type="search"
-                placeholder="Abone ara"
-                autoComplete="off"
-                spellCheck="false"
-                data-search-input
-                value={searchValue}
-                onChange={(event) => updateSearch(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Escape') {
-                    updateSearch('');
-                    event.currentTarget.blur();
-                  }
-                }}
-              />
-              <kbd aria-hidden="true">/</kbd>
-            </form>
+            <SubscriberSearch variant="topbar" onSelect={openDrawer} />
 
             <div className="topbar-actions">
               {canAct && (

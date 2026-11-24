@@ -646,6 +646,81 @@ h1[tabindex="-1"]:focus { outline: none; }
   background: var(--surface);
   font-size: 13px;
 }
+
+/* quick search: results drop below the field, the table stays put */
+.search-suggest {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  width: 100%;
+  min-width: min(320px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+.suggest-list {
+  max-height: 304px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+.suggest-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "name risk" "meta meta";
+  gap: 1px 10px;
+  padding: 7px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.suggest-option[aria-selected="true"] { background: var(--raised); }
+.suggest-name {
+  grid-area: name;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.suggest-risk {
+  grid-area: risk;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 17px;
+}
+.suggest-meta {
+  grid-area: meta;
+  display: flex;
+  min-width: 0;
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 15px;
+}
+.suggest-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest-id { flex: none; font-family: var(--font-mono); /* taste-skill-ignore: IDs only */ }
+.suggest-empty {
+  padding: 9px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 17px;
+}
+.suggest-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+  border-top: 1px solid var(--rule);
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 16px;
+}
 .toolbar .spacer { flex: 1; }
 .result-count { color: var(--faint); font-size: var(--fs-small); }
 .chips { display: flex; align-items: center; gap: 2px; padding: 2px; border-radius: 6px; background: var(--raised); }
