@@ -2,32 +2,35 @@
   "manifestVersion": 1,
   "application": {
     "name": "Kavurma",
-    "description": "Static BI dashboard demo for Kavurma Roasters, a fictional Istanbul coffee roaster. It tracks subscription health: growth and churn, plan mix, weekly roast capacity, acquisition channels, and at-risk subscribers.",
-    "framework": "Static HTML, CSS and vanilla JavaScript (no build step)"
+    "description": "Subscription health BI dashboard demo for Kavurma Roasters, a fictional Istanbul coffee roaster. It tracks subscription health: growth and churn, plan mix, weekly roast capacity and batches, acquisition channels, and at-risk subscribers.",
+    "framework": "Vite + React with client-side routing (react-router-dom)"
   },
   "routes": [
     {
       "id": "sign-in",
-      "path": "/#giris",
+      "path": "/giris",
       "description": "Public demo sign-in gate with e-mail and password fields, an inline error for wrong credentials, and a list of three mock accounts covering the admin, operations and viewer roles.",
       "feature": "authentication",
       "files": [
         "index.html",
-        "assets/app.js",
-        "assets/data.js",
-        "assets/app.css"
+        "src/main.jsx",
+        "src/App.jsx",
+        "src/views/AuthView.jsx",
+        "src/context/AuthContext.jsx",
+        "src/data.js"
       ],
       "notes": [
-        "Public route: it is the only view reachable without a session; every other hash redirects here.",
+        "Public route: it is the only view reachable without a session; every other path redirects here.",
         "The three demo credentials are shown on the sign-in card on purpose. They are mock values checked in the browser, not real accounts.",
         "Successful sign-in stores {email, role, name, title} in sessionStorage under kavurma.session; there is no cookie, localStorage persistence, backend or real credential verification.",
+        "After signing in, the app returns to the protected path that originally redirected to /giris; otherwise it opens /genel-bakis.",
         "A fresh browser session starts signed out; reloading the same tab keeps the session until sign-out or tab close.",
         "The password field has a show/hide control; demo account rows fill the form for keyboard and manual testing."
       ]
     },
     {
       "id": "overview",
-      "path": "/#genel-bakis",
+      "path": "/genel-bakis",
       "description": "Subscription health overview with a headline finding, four KPIs (MRR, active subscribers, new subscribers, monthly churn), a weekly joins/cancellations chart, plan distribution, roast capacity, the top at-risk subscribers, and acquisition channels.",
       "feature": "subscription-health",
       "roles": [
@@ -36,22 +39,24 @@
         "viewer"
       ],
       "files": [
-        "index.html",
-        "assets/app.js",
-        "assets/data.js",
-        "assets/charts.js"
+        "src/App.jsx",
+        "src/components/AppLayout.jsx",
+        "src/views/Overview.jsx",
+        "src/components/FlowChart.jsx",
+        "src/lib/charts.js",
+        "src/data.js"
       ],
       "notes": [
-        "Default view after sign-in: an empty hash or an unrecognized hash renders this view; the canonical deep link is /#genel-bakis.",
-        "Protected route: without a session, /#genel-bakis and every other non-sign-in hash redirect to /#giris.",
+        "Default protected view: the root path and unrecognized paths render this view when a session exists; the canonical deep link is /genel-bakis.",
+        "Protected route: without a session, /genel-bakis and every other protected path redirect to /giris.",
         "The subscriber-flow chart can be switched between 4, 8 and 13 weeks.",
-        "The at-risk preview shows four at-risk subscribers and links to /#aboneler?filter=risk.",
+        "The at-risk preview shows four at-risk subscribers and links to /aboneler?filter=risk.",
         "The at-risk message buttons are hidden for the viewer role."
       ]
     },
     {
       "id": "subscribers",
-      "path": "/#aboneler",
+      "path": "/aboneler",
       "description": "Full subscriber list with name, ID, plan, tenure, last box date, signal and risk score. Supports text search, all/risky/healthy filters, sorting, and opening a per-subscriber message draft.",
       "feature": "subscriber-management",
       "roles": [
@@ -60,23 +65,26 @@
         "viewer"
       ],
       "files": [
-        "index.html",
-        "assets/app.js",
-        "assets/data.js"
+        "src/App.jsx",
+        "src/components/AppLayout.jsx",
+        "src/views/Subscribers.jsx",
+        "src/components/SubscriberDrawer.jsx",
+        "src/components/MessageDialog.jsx",
+        "src/data.js"
       ],
       "notes": [
-        "Protected route: without a session, /#aboneler redirects to /#giris.",
-        "Supported hash query parameters: filter=all|risk|healthy and q=<search text>; invalid filter values fall back to all.",
+        "Protected route: without a session, /aboneler redirects to /giris.",
+        "Supported query parameters: filter=all|risk|healthy and q=<search text>; invalid filter values are removed and fall back to all.",
+        "Filter and search live in the URL query string, so deep links and reloads keep the same list state. Sort order is UI state only and is not stored in the URL.",
         "A subscriber is classified as risky when the risk score is 35 or higher.",
         "Search matches name, subscriber ID, plan and signal, using Turkish-aware case and diacritic folding.",
-        "Sort order is UI state only and is not stored in the URL.",
         "Message drafting opens a <dialog> overlay; it is not a separate route.",
         "The viewer role can search, filter, sort and open the read-only subscriber drawer, but the message action and its drawer button are hidden."
       ]
     },
     {
       "id": "actions",
-      "path": "/#aksiyonlar",
+      "path": "/aksiyonlar",
       "feature": "action-queue",
       "roles": [
         "admin",
@@ -84,25 +92,49 @@
       ],
       "description": "Operations queue for delivery, payment and win-back actions tied to at-risk subscribers, with category chips, a status filter, a resolution modal (compensation type plus operations note, mark resolved or reopen) and a handoff to the subscriber message draft.",
       "files": [
-        "index.html",
-        "assets/app.js",
-        "assets/data.js",
-        "assets/app.css"
+        "src/App.jsx",
+        "src/components/AppLayout.jsx",
+        "src/components/RouteGuards.jsx",
+        "src/views/Actions.jsx",
+        "src/components/ActionDialog.jsx",
+        "src/data.js"
       ],
       "notes": [
-        "Hash route: the server receives only /; the canonical deep link is /#aksiyonlar.",
-        "Protected route: without a session, /#aksiyonlar redirects to /#giris; with the viewer role it redirects to /#genel-bakis and shows a non-blocking notice.",
+        "Protected route: without a session, /aksiyonlar redirects to /giris; with the viewer role it redirects to /genel-bakis and shows a non-blocking notice.",
         "The actions navigation link, CSV export, message buttons and resolution controls are hidden for the viewer role.",
         "Category filter values are all|teslimat|odeme|geri-kazanim; status filter values are all|pending|resolved.",
         "Resolving or reopening an action updates only in-memory demo state and resets on reload.",
         "The row action button opens the resolution modal, while the row itself opens the subscriber drawer."
+      ]
+    },
+    {
+      "id": "batches",
+      "path": "/partiler",
+      "feature": "roast-batches",
+      "roles": [
+        "admin",
+        "operations",
+        "viewer"
+      ],
+      "description": "Weekly roast-batch plan with four KPIs (planned boxes, green coffee weight, completed batches, skipped subscribers), a status filter, and a batch table/card list with origin, roast level, boxes, kilograms, status, date and note.",
+      "files": [
+        "src/App.jsx",
+        "src/components/AppLayout.jsx",
+        "src/views/Batches.jsx",
+        "src/data.js"
+      ],
+      "notes": [
+        "Protected route: without a session, /partiler redirects to /giris.",
+        "Status filter values are all|roasted|packing|planned; counts are derived from the bundled batch rows.",
+        "The view is read-only in this demo; batch status and packing progress are not editable.",
+        "Mobile layouts switch the table to cards that keep the origin, roast level, boxes, kilograms, date and note."
       ]
     }
   ],
   "flows": [
     {
       "id": "sign-in-and-choose-role",
-      "description": "Open the public sign-in gate and enter the dashboard with one of the three demo accounts. Admin and operations roles open every view and action; the viewer role is limited to the overview and subscriber list.",
+      "description": "Open the public sign-in gate and enter the dashboard with one of the three demo accounts. Admin and operations roles open every view and action; the viewer role is limited to the overview, subscriber list and roast batches.",
       "routeIds": [
         "sign-in"
       ],
@@ -127,7 +159,7 @@
         "JavaScript is enabled for chart rendering and period switching"
       ],
       "testDataRequirements": [
-        "Bundled demo data in assets/data.js (snapshot dated 2026-11-22, amounts in TRY)"
+        "Bundled demo data in src/data.js (snapshot dated 2026-11-22, amounts in TRY)"
       ]
     },
     {
@@ -146,7 +178,7 @@
     },
     {
       "id": "search-filter-sort-subscribers",
-      "description": "Search the subscriber list by name, ID, plan or signal; filter by all, risky or healthy; sort by risk score, name or tenure; and clear filters from the empty state.",
+      "description": "Search the subscriber list by name, ID, plan or signal; filter by all, risky or healthy; sort by risk score, name or tenure; and clear filters from the empty state. Filter and search survive a reload because they are query parameters.",
       "routeIds": [
         "subscribers"
       ],
@@ -200,7 +232,7 @@
         "Browser download via Blob and object URL (no network request)"
       ],
       "testDataRequirements": [
-        "Bundled demo data in assets/data.js"
+        "Bundled demo data in src/data.js"
       ]
     },
     {
@@ -218,16 +250,35 @@
         "JavaScript is enabled"
       ],
       "testDataRequirements": [
-        "12 bundled action rows in assets/data.js (11 pending, 1 resolved)"
+        "12 bundled action rows in src/data.js (11 pending, 1 resolved)"
+      ]
+    },
+    {
+      "id": "review-roast-batches",
+      "description": "Open the roast batches view and read the weekly KPI summary, then filter the six batches by roasted, packing or planned status.",
+      "routeIds": [
+        "batches"
+      ],
+      "roles": [
+        "admin",
+        "operations",
+        "viewer"
+      ],
+      "prerequisites": [
+        "JavaScript is enabled"
+      ],
+      "testDataRequirements": [
+        "Six bundled batch rows in src/data.js (2 roasted, 2 packing, 2 planned)"
       ]
     },
     {
       "id": "navigate-between-views",
-      "description": "Move between the overview, the subscriber list and the actions queue using the sidebar links or the mobile menu; the hash, active navigation item, breadcrumb, page title and visible view update.",
+      "description": "Move between the overview, subscriber list, actions queue and roast batches using the sidebar links or the mobile menu; the path, active navigation item, breadcrumb, page title and visible view update.",
       "routeIds": [
         "overview",
         "subscribers",
-        "actions"
+        "actions",
+        "batches"
       ],
       "roles": [
         "admin",
@@ -241,12 +292,13 @@
     }
   ],
   "notes": [
-    "Mock authentication is implemented entirely client-side for demo and QA purposes: three demo accounts, a sessionStorage record under kavurma.session, and a public /#giris sign-in route. There is no backend, no cookie, no real credential verification and no security boundary.",
-    "Role gating is part of the demo UI, not an authorization control. Admin and operations roles can use every view, CSV export, message draft and action resolution; the viewer role is limited to the overview and subscriber list with read-only subscriber details.",
-    "Hash-based client-side routing: the sign-in gate and all three app views (overview, subscribers and actions) are sections of index.html, not separate server routes. The server receives only /.",
-    "All figures come from bundled demo data in assets/data.js; there are no API calls, databases, third-party network requests, dependencies or build steps. Action resolutions are in-memory only and are not persisted anywhere.",
+    "Mock authentication is implemented entirely client-side for demo and QA purposes: three demo accounts, a sessionStorage record under kavurma.session, and a public /giris sign-in route. There is no backend, no cookie, no real credential verification and no security boundary.",
+    "Role gating is part of the demo UI, not an authorization control. Admin and operations roles can use every view, CSV export, message draft and action resolution; the viewer role is limited to the overview, subscriber list and roast batches with read-only subscriber details.",
+    "The app is a Vite + React single-page application using BrowserRouter. Routes are real paths, not hashes. Vite serves the SPA fallback in dev and preview; Vercel uses the catch-all rewrite in vercel.json for deep links.",
+    "Route guards live in src/components/RouteGuards.jsx: RequireAuth redirects signed-out visitors to /giris and preserves the requested path, while RequireRole redirects unauthorized roles to /genel-bakis with a notice.",
+    "All figures come from bundled demo data in src/data.js; there are no API calls, databases or third-party network requests. Action resolutions are in-memory only and are not persisted anywhere.",
     "No destructive actions are implemented: the message dialog does not send messages, and CSV export only creates a local download.",
-    "Charts, filtering, sorting, CSV export, message drafting, action resolution and mobile navigation require JavaScript; KPI values and table markup are also present statically, but the app shell stays hidden until the session check runs.",
-    "The repository has no documented automated test suite; run locally by opening index.html or serving the directory with a static file server."
+    "Charts, filtering, sorting, CSV export, message drafting, action resolution and mobile navigation require JavaScript; the app requires a build step and cannot run from file://.",
+    "The repository has no documented automated test suite; verify with npm run build plus browser checks of the route guards, filters and dialogs."
   ]
 }

@@ -92,6 +92,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+/* Headings receive programmatic focus after a route change for screen readers;
+   the view transition itself is the visual cue, so no ring is drawn. */
+h1[tabindex="-1"]:focus { outline: none; }
 ::selection { background: var(--accent-soft); color: var(--text); }
 .num, .kpi-value, .risk-rank, .plan-count, .roast-figure, .channel-value { font-variant-numeric: tabular-nums; }
 .sr-only {
