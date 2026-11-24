@@ -119,11 +119,6 @@
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5h12M4 10h8M4 13.5h5"/><circle cx="15" cy="13.5" r="2.5"/></svg>
           Aksiyonlar
         </a>
-        <p class="group-label">Üretim</p>
-        <a class="nav-item" href="#partiler" data-nav="batches">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 7.5 10 4l5.5 3.5v5L10 16l-5.5-3.5v-5Z"/><path d="M4.5 7.5 10 11l5.5-3.5M10 11v5"/></svg>
-          Kavurma partileri
-        </a>
       </nav>
 
       <div class="sidebar-foot">
@@ -429,81 +424,6 @@
             <span>Tüm kategorileri ve durumları görmek için filtreyi sıfırlayabilirsin.</span>
             <button class="row-action" type="button" id="clear-action-filters">Filtreyi temizle</button>
           </div>
-        </section>
-
-        <section class="view" id="view-batches" aria-labelledby="batches-title" hidden>
-          <div class="title-row subs-title">
-            <div>
-              <h1 id="batches-title">Kavurma partileri</h1>
-              <p class="view-sub">Haftalık kavurma planı, çekirdek menşeleri ve paketleme durumu.</p>
-            </div>
-            <div class="title-actions">
-              <p class="stamp" id="batches-stamp">24 Kas 2026 haftası</p>
-            </div>
-          </div>
-
-          <div class="kpis" aria-label="Haftalık kavurma özeti">
-            <div class="kpi lead">
-              <p class="kpi-label">Planlanan kutu</p>
-              <p class="kpi-value" id="batch-kpi-boxes">1.764</p>
-              <p class="kpi-delta"><span class="pos">%84 doluluk</span> <span class="baseline">2.100 kapasite</span></p>
-            </div>
-            <div class="kpi">
-              <p class="kpi-label">Kavrulacak çekirdek</p>
-              <p class="kpi-value" id="batch-kpi-kg">442 kg</p>
-              <p class="kpi-delta"><span class="baseline">6 aktif parti</span></p>
-            </div>
-            <div class="kpi">
-              <p class="kpi-label">Tamamlanan parti</p>
-              <p class="kpi-value" id="batch-kpi-roasted">2 / 6</p>
-              <p class="kpi-delta"><span class="pos">840 kutu</span> <span class="baseline">kavruldu</span></p>
-            </div>
-            <div class="kpi">
-              <p class="kpi-label">Atlayan abone</p>
-              <p class="kpi-value" id="batch-kpi-skipped">78</p>
-              <p class="kpi-delta"><span class="baseline">bu hafta pas geçildi</span></p>
-            </div>
-          </div>
-
-          <div class="toolbar">
-            <div class="chips" role="group" aria-label="Parti durumu filtresi">
-              <button class="chip batch-chip" type="button" data-batch-status="all" aria-pressed="true">Tümü <span class="count">6</span></button>
-              <button class="chip batch-chip" type="button" data-batch-status="roasted" aria-pressed="false">Kavruldu <span class="count">2</span></button>
-              <button class="chip batch-chip" type="button" data-batch-status="packing" aria-pressed="false">Paketlemede <span class="count">2</span></button>
-              <button class="chip batch-chip" type="button" data-batch-status="planned" aria-pressed="false">Planlandı <span class="count">2</span></button>
-            </div>
-            <span class="spacer"></span>
-          </div>
-
-          <p class="result-count" id="batch-count" aria-live="polite">6 parti</p>
-
-          <div class="table-wrap" id="batches-table-wrap">
-            <table class="subs-table">
-              <colgroup>
-                <col style="width:26%">
-                <col style="width:12%">
-                <col style="width:10%">
-                <col style="width:10%">
-                <col style="width:13%">
-                <col style="width:11%">
-                <col>
-              </colgroup>
-              <thead>
-                <tr>
-                  <th scope="col">Parti / Menşe</th>
-                  <th scope="col">Kavrum</th>
-                  <th scope="col" class="n">Kutu</th>
-                  <th scope="col" class="n">Miktar</th>
-                  <th scope="col">Durum</th>
-                  <th scope="col" class="n">Tarih</th>
-                  <th scope="col">Not</th>
-                </tr>
-              </thead>
-              <tbody id="batches-body"></tbody>
-            </table>
-          </div>
-
-          <div class="subs-cards" id="batches-cards"></div>
         </section>
       </main>
     </div>
