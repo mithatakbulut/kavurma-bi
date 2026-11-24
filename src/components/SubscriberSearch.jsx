@@ -170,7 +170,7 @@ export default function SubscriberSearch({
           </ul>
           <p className="suggest-foot">
             <span>{matches.length === 0 ? 'Sonuç yok' : `${int.format(matches.length)} abone`}</span>
-            <span>↑↓ gez · ↵ aç</span>
+            <span>↑↓ gez · ↵ aç · Esc temizle</span>
           </p>
         </div>
       )}
