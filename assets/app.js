@@ -58,9 +58,9 @@
   const SESSION_KEY = AUTH.sessionKey;
   const ACTOR_ROLES = ['admin', 'operations'];
   const ROLE_VIEWS = {
-    admin: ['overview', 'subscribers', 'actions'],
-    operations: ['overview', 'subscribers', 'actions'],
-    viewer: ['overview', 'subscribers']
+    admin: ['overview', 'subscribers', 'actions', 'batches'],
+    operations: ['overview', 'subscribers', 'actions', 'batches'],
+    viewer: ['overview', 'subscribers', 'batches']
   };
 
   const readSession = () => {
@@ -302,6 +302,66 @@
     $('#actions-cards').hidden = empty;
   };
 
+  /* ---------- roast batches ---------- */
+  const batchRows = D.roastBatches || [];
+  const batchState = { status: 'all' };
+
+  const batchStatusPill = (status, label) => {
+    const cls = status === 'roasted' ? 'ok' : status === 'packing' ? 'warn' : 'muted';
+    return `<span class="badge ${cls}">${esc(label)}</span>`;
+  };
+
+  const renderBatches = () => {
+    const rows = batchRows.filter((item) => batchState.status === 'all' || item.status === batchState.status);
+    const counts = {
+      all: batchRows.length,
+      roasted: batchRows.filter((item) => item.status === 'roasted').length,
+      packing: batchRows.filter((item) => item.status === 'packing').length,
+      planned: batchRows.filter((item) => item.status === 'planned').length
+    };
+
+    $$('.batch-chip').forEach((chip) => {
+      const status = chip.dataset.batchStatus;
+      chip.setAttribute('aria-pressed', String(status === batchState.status));
+      const count = $('.count', chip);
+      if (count) count.textContent = int.format(counts[status] ?? 0);
+    });
+
+    $('#batch-count').textContent = `${int.format(rows.length)} parti`;
+    $('#batches-body').innerHTML = rows.map((item) => `
+      <tr>
+        <td class="name-cell">
+          <div class="sub-id">
+            <span class="name">${esc(item.origin)}</span>
+            <span class="id">${esc(item.id)}</span>
+          </div>
+        </td>
+        <td>${esc(item.roastLevel)}</td>
+        <td class="n">${int.format(item.boxes)}</td>
+        <td class="n">${int.format(item.kg)} kg</td>
+        <td>${batchStatusPill(item.status, item.statusLabel)}</td>
+        <td class="n">${fmtDay(item.roastDate)}</td>
+        <td>${esc(item.note)}</td>
+      </tr>
+    `).join('');
+
+    $('#batches-cards').innerHTML = rows.map((item) => `
+      <article class="sub-row">
+        <div class="sub-top">
+          <div class="sub-id">
+            <span class="name">${esc(item.origin)}</span>
+            <span class="id">${esc(item.id)} · ${esc(item.roastLevel)}</span>
+          </div>
+          ${batchStatusPill(item.status, item.statusLabel)}
+        </div>
+        <p class="sub-meta">${int.format(item.boxes)} kutu · ${int.format(item.kg)} kg · ${fmtDay(item.roastDate)}</p>
+        <div class="sub-bottom">
+          <span class="signal">${esc(item.note)}</span>
+        </div>
+      </article>
+    `).join('');
+  };
+
   /* ---------- plan mix ---------- */
   const planShares = D.plans.map((plan) => plan.subscribers / totals.totalSubs);
   const planColors = ['var(--accent)', 'var(--text)', 'var(--chart-muted)'];
@@ -415,6 +475,7 @@
   const viewOverview = $('#view-overview');
   const viewSubs = $('#view-subscribers');
   const viewActions = $('#view-actions');
+  const viewBatches = $('#view-batches');
   const navLinks = $$('[data-nav]');
   const crumb = $('#crumb-current');
   const globalSearch = $('#global-q');
@@ -483,7 +544,10 @@
       replaceHash('#genel-bakis');
     }
 
-    let currentView = name === 'aboneler' ? 'subscribers' : name === 'aksiyonlar' ? 'actions' : 'overview';
+    let currentView = name === 'aboneler' ? 'subscribers'
+      : name === 'aksiyonlar' ? 'actions'
+        : name === 'partiler' ? 'batches'
+          : 'overview';
     if (!canView(currentView)) {
       currentView = 'overview';
       replaceHash('#genel-bakis');
@@ -493,6 +557,7 @@
     viewOverview.hidden = currentView !== 'overview';
     viewSubs.hidden = currentView !== 'subscribers';
     viewActions.hidden = currentView !== 'actions';
+    viewBatches.hidden = currentView !== 'batches';
 
     navLinks.forEach((link) => {
       if (link.dataset.nav === currentView) link.setAttribute('aria-current', 'page');
@@ -502,7 +567,8 @@
     const titles = {
       overview: ['Genel bakış', 'Kavurma · Abonelik sağlığı'],
       subscribers: ['Aboneler', 'Kavurma · Aboneler'],
-      actions: ['Aksiyonlar', 'Kavurma · Aksiyonlar']
+      actions: ['Aksiyonlar', 'Kavurma · Aksiyonlar'],
+      batches: ['Kavurma partileri', 'Kavurma · Kavurma partileri']
     };
     crumb.textContent = titles[currentView][0];
     document.title = titles[currentView][1];
@@ -517,12 +583,18 @@
     } else if (currentView === 'actions') {
       if (document.activeElement !== globalSearch) globalSearch.value = '';
       renderActions();
+    } else if (currentView === 'batches') {
+      if (document.activeElement !== globalSearch) globalSearch.value = '';
+      renderBatches();
     } else {
       if (document.activeElement !== globalSearch) globalSearch.value = '';
     }
 
     closeMenu(false);
-    const activeView = currentView === 'subscribers' ? viewSubs : currentView === 'actions' ? viewActions : viewOverview;
+    const activeView = currentView === 'subscribers' ? viewSubs
+      : currentView === 'actions' ? viewActions
+        : currentView === 'batches' ? viewBatches
+          : viewOverview;
     const heading = $('h1', activeView);
     if (heading) {
       heading.setAttribute('tabindex', '-1');
@@ -644,6 +716,13 @@
     chip.addEventListener('click', () => {
       actionState.category = chip.dataset.actionCat;
       renderActions();
+    });
+  });
+
+  $$('.batch-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      batchState.status = chip.dataset.batchStatus;
+      renderBatches();
     });
   });
 
