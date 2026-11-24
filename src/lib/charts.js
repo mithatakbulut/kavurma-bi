@@ -28,7 +28,7 @@
 // the legend is drawn from the same style objects as the marks, so a swatch is always the mark scaled down. Put it in
 // the card's header, or pass legend: element (or a selector) to have it filled.
 // Numbers follow the page's language (<html lang>). Every chart gets role="img" and an aria-label that states what it shows.
-(() => {
+const Charts = (() => {
   const NS = 'http://www.w3.org/2000/svg', MINUS = '\u2212', ROW = 14, LANE = (rows) => 8 + rows * ROW + (rows ? 4 : 0);
   const css = (el, name, fb) => getComputedStyle(el).getPropertyValue(name).trim() || fb;
   const cssNum = (el, name, fb) => { const v = parseFloat(css(el, name, '')); return Number.isFinite(v) ? v : fb; };
@@ -615,5 +615,7 @@
     return { get svg() { return el.querySelector(':scope > svg'); }, legend: legendEl(items, legend) };
   }
   function watch(el, draw) { if (!('ResizeObserver' in window)) return; let w = el.clientWidth; new ResizeObserver(() => { if (Math.abs(el.clientWidth - w) > 4) { w = el.clientWidth; draw(); } }).observe(el); }
-  window.Charts = { line, bars, diverging, ring, barList, plan, bullet, timeline, matrix, timeStrip, ticks, fmt };
+  return { line, bars, diverging, ring, barList, plan, bullet, timeline, matrix, timeStrip, ticks, fmt };
 })();
+
+export default Charts;
