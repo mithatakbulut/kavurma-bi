@@ -1,0 +1,128 @@
+schema_version: 1
+blueprint:
+  name: tandem-blueprint
+  version: 0.1.0
+  channel: stable
+project:
+  id: kavurma-bi
+  stack: node
+generated_at: "2026-11-26T01:37:22Z"
+files:
+  - path: AGENTS.md
+    strategy: merge
+    template_version: 0.1.0
+    sha256: 769dff7d0ec02f59d49386baafb4c761b859ee9497c9500a84eca0559ccb3f47
+    template_sha256: 769dff7d0ec02f59d49386baafb4c761b859ee9497c9500a84eca0559ccb3f47
+  - path: docs/architecture/overview.md
+    strategy: merge
+    template_version: 0.1.0
+    sha256: 5050da635330460ccfe2b64e8cff48074eb0f8b51e8b995187ea4c36122efd51
+    template_sha256: 5050da635330460ccfe2b64e8cff48074eb0f8b51e8b995187ea4c36122efd51
+  - path: docs/testing/strategy.md
+    strategy: merge
+    template_version: 0.1.0
+    sha256: c23cff8d3c90b310aefa199f644517cf1d58570814c2e2b1baa5174acc33eb74
+    template_sha256: c23cff8d3c90b310aefa199f644517cf1d58570814c2e2b1baa5174acc33eb74
+  - path: docs/decisions/template.md
+    strategy: replace-unmodified
+    template_version: 0.1.0
+    sha256: eff6b9f474bf89c8b713f789c0d738e2fc34bd9f76f30fd9b73008b9b89b394f
+    template_sha256: eff6b9f474bf89c8b713f789c0d738e2fc34bd9f76f30fd9b73008b9b89b394f
+  - path: docs/github-setup.md
+    strategy: replace-unmodified
+    template_version: 0.1.0
+    sha256: f08b483aa20865afb3b501fdda727345d9c1318daaf32fac24b7163105cacc60
+    template_sha256: f08b483aa20865afb3b501fdda727345d9c1318daaf32fac24b7163105cacc60
+  - path: .github/ISSUE_TEMPLATE/task.md
+    strategy: merge
+    template_version: 0.1.0
+    sha256: 7aaade69d1915867fd0c15c50315d7577cde5fc8e7c8c741f50074b1c09d6643
+    template_sha256: 7aaade69d1915867fd0c15c50315d7577cde5fc8e7c8c741f50074b1c09d6643
+  - path: .github/ISSUE_TEMPLATE/bug.md
+    strategy: merge
+    template_version: 0.1.0
+    sha256: 46a3ef6f855f823b0205e4fe967d300126a0982b9ac13a3f2ee7d2a0d91fc443
+    template_sha256: 46a3ef6f855f823b0205e4fe967d300126a0982b9ac13a3f2ee7d2a0d91fc443
+  - path: .github/ISSUE_TEMPLATE/config.yml
+    strategy: replace-unmodified
+    template_version: 0.1.0
+    sha256: 8b09e7df09fc7534371988062769ee427af2954a02c04c763e8a8005be0f2be4
+    template_sha256: 8b09e7df09fc7534371988062769ee427af2954a02c04c763e8a8005be0f2be4
+  - path: .github/pull_request_template.md
+    strategy: merge
+    template_version: 0.1.0
+    sha256: 68ee4cad7900b12fe07b996d4969558b6d4f411168cdfde3ff6f16f77a3f8487
+    template_sha256: 68ee4cad7900b12fe07b996d4969558b6d4f411168cdfde3ff6f16f77a3f8487
+  - path: .github/workflows/verify.yml
+    strategy: merge
+    template_version: 0.1.0
+    sha256: 9917385c75a83a6287154011d9eb4b70da6d685e4811d3d5f3b82961d5a06fd8
+    template_sha256: 9917385c75a83a6287154011d9eb4b70da6d685e4811d3d5f3b82961d5a06fd8
+  - path: .nvmrc
+    strategy: project-owned
+    template_version: 0.1.0
+    sha256: 68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53
+    template_sha256: 68ca3fba3b7e864770cb61aeb306d4bd4354b68ab4dd38450860c5d823e42a53
+  - path: .harness/project.yaml
+    strategy: project-owned
+    template_version: 0.1.0
+    sha256: d3a9858672673910d657319e8f1af47cd56d3f9a8a44e1153b28df2b4881bcc9
+    template_sha256: d3a9858672673910d657319e8f1af47cd56d3f9a8a44e1153b28df2b4881bcc9
+  - path: .harness/policy.yaml
+    strategy: project-owned
+    template_version: 0.1.0
+    sha256: 69f1717f8355c297dfb689d347c62179e034c37413572f3293fadaa02e67498e
+    template_sha256: 69f1717f8355c297dfb689d347c62179e034c37413572f3293fadaa02e67498e
+  - path: .harness/exceptions.yaml
+    strategy: project-owned
+    template_version: 0.1.0
+    sha256: 8143d667bca8bc168db33516b09e62f618598813196150c28a3b6bb20d583781
+    template_sha256: 8143d667bca8bc168db33516b09e62f618598813196150c28a3b6bb20d583781
+  - path: scripts/bootstrap.sh
+    strategy: replace-unmodified
+    template_version: 0.1.0
+    sha256: a3abb28fa6ed78ce81c3c0618b68efb764bb03bee41f956c0fda9b0a63e223ae
+    template_sha256: a3abb28fa6ed78ce81c3c0618b68efb764bb03bee41f956c0fda9b0a63e223ae
+  - path: scripts/verify.sh
+    strategy: replace-unmodified
+    template_version: 0.1.0
+    sha256: 29162a3f8a2780e4b2cc5a9ae42428b59fe2a84bbabc5db5d1b77f171ccae4db
+    template_sha256: 29162a3f8a2780e4b2cc5a9ae42428b59fe2a84bbabc5db5d1b77f171ccae4db
+  - path: scripts/doctor.sh
+    strategy: replace-unmodified
+    template_version: 0.1.0
+    sha256: 9e45491156fabfc8872d21a26eb1c26210ae9b02a64b7762a7e489dee6fcb111
+    template_sha256: 9e45491156fabfc8872d21a26eb1c26210ae9b02a64b7762a7e489dee6fcb111
+  - path: scripts/check-architecture.sh
+    strategy: replace-unmodified
+    template_version: 0.1.0
+    sha256: 7a6a7a75bffebca2f87d85ddafb13f9ecc5868c9ac6a8baf18577e7f386b6482
+    template_sha256: 7a6a7a75bffebca2f87d85ddafb13f9ecc5868c9ac6a8baf18577e7f386b6482
+  - path: scripts/security.sh
+    strategy: replace-unmodified
+    template_version: 0.1.0
+    sha256: dd39a6f1cba611813030b4a0488d18994b5345bcf043221f06e0277beef72116
+    template_sha256: dd39a6f1cba611813030b4a0488d18994b5345bcf043221f06e0277beef72116
+  - path: package.json
+    strategy: project-owned
+    template_version: 0.1.0
+    sha256: 815689adff820d473c15db3f9487dd74c8289892e9898ff9ee242077eaf417fc
+    template_sha256: e394ebc8ba521403339603a355c64dd76d349f01b56620568e09bf79efbdad42
+  - path: src/index.js
+    strategy: project-owned
+    template_version: 0.1.0
+    sha256: 5ac265273ec299946dd181265a130b58c7210c6e0e481e7444ff5a6a6cb0119f
+    template_sha256: 5ac265273ec299946dd181265a130b58c7210c6e0e481e7444ff5a6a6cb0119f
+  - path: test/index.test.js
+    strategy: project-owned
+    template_version: 0.1.0
+    sha256: 1f4a35f17f4f4fa4a16abba33173bdabb27c34d9c3fbd8eeb9b6b917d31f9425
+    template_sha256: 1f4a35f17f4f4fa4a16abba33173bdabb27c34d9c3fbd8eeb9b6b917d31f9425
+history:
+  - version: 0.1.0
+    applied_at: "2026-11-26T01:37:22Z"
+    note: adopted existing repository
+setup:
+  notes:
+    - e2e is not_applicable until a runtime target exists
+    - adopted; conflicts are listed in docs/plans/adoption-0.1.0.md

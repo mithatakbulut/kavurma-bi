@@ -1,0 +1,5 @@
+# Time-limited exceptions to a required check. An exception never turns a
+# failure into a pass; it records who accepted the risk and when it expires.
+# Tandem creates this register empty. Only the repository owner may add an entry.
+schema_version: 1
+exceptions: []

@@ -1,0 +1,24 @@
+schema_version: 1
+project:
+  id: kavurma-bi
+  stack: node
+  default_branch: main
+workspace:
+  bootstrap: ["./scripts/bootstrap.sh"]
+  verify: ["./scripts/verify.sh"]
+  timeout_seconds: 900
+  runtime:
+    supported: false
+checks:
+
+  lint: required
+  unit: required
+  integration: conditional
+  build: required
+  architecture: required
+  security: required
+  e2e: not_applicable
+
+capabilities:
+  browser: false
+  integration_services: []

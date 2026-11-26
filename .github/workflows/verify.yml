@@ -1,0 +1,48 @@
+# Trusted verification gate for kavurma-bi.
+#
+# Rules that must not be weakened:
+# - This is the required status check named `verify`.
+# - No `pull_request_target`, no secrets and no write token in a pull-request
+#   run. Untrusted code runs with a read-only token.
+# - Every action is pinned to a full commit SHA; update a pin in a separate
+#   reviewed change.
+# - No path filter: a required check must report on every pull request instead
+#   of waiting forever.
+# - Concurrency cancels only superseded runs of the same pull request. A
+#   cancelled or missing required check is not a pass.
+name: verify
+
+on:
+  pull_request:
+  push:
+    branches: [ "main" ]
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+
+      - name: Verify
+        run: ./scripts/verify.sh
