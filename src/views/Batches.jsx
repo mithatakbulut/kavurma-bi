@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import data from '../data.js';
-import { dateOf, fmtDay, int } from '../lib/format.js';
+import { dateOf, fmtDay, fmtWeight, int } from '../lib/format.js';
 
 const STATUSES = [
   { key: 'all', label: 'Tümü' },
@@ -56,7 +56,7 @@ export default function Batches() {
         </div>
         <div className="kpi">
           <p className="kpi-label">Kavrulacak çekirdek</p>
-          <p className="kpi-value">{int.format(totalKg)} kg</p>
+          <p className="kpi-value">{fmtWeight(totalKg)}</p>
           <p className="kpi-delta"><span className="baseline">{batchRows.length} aktif parti</span></p>
         </div>
         <div className="kpi">
@@ -126,7 +126,7 @@ export default function Batches() {
                 </td>
                 <td>{item.roastLevel}</td>
                 <td className="n">{int.format(item.boxes)}</td>
-                <td className="n">{int.format(item.kg)} kg</td>
+                <td className="n">{fmtWeight(item.kg)}</td>
                 <td><StatusBadge status={item.status} label={item.statusLabel} /></td>
                 <td className="n">{fmtDay(item.roastDate)}</td>
                 <td>{item.note}</td>
@@ -147,7 +147,7 @@ export default function Batches() {
               <StatusBadge status={item.status} label={item.statusLabel} />
             </div>
             <p className="sub-meta">
-              {int.format(item.boxes)} kutu · {int.format(item.kg)} kg · {fmtDay(item.roastDate)}
+              {int.format(item.boxes)} kutu · {fmtWeight(item.kg)} · {fmtDay(item.roastDate)}
             </p>
             <div className="sub-bottom">
               <span className="signal">{item.note}</span>

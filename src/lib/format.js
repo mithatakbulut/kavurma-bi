@@ -12,7 +12,12 @@ const moneyFmt = new Intl.NumberFormat('tr-TR', {
 });
 
 const MINUS = '\u2212';
+const DASH = '\u2014';
 export const money = (value) => moneyFmt.format(value);
+export const fmtWeight = (value) => {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return DASH;
+  return `${Number.isInteger(value) ? int.format(value) : dec1.format(value)} kg`;
+};
 export const signedInt = (value) => (value > 0 ? '+' : value < 0 ? MINUS : '') + int.format(Math.abs(value));
 export const signedMoney = (value) => (value > 0 ? '+' : value < 0 ? MINUS : '') + money(Math.abs(value));
 
