@@ -22,6 +22,11 @@ npm run build
 npm run preview   # http://localhost:4173
 ```
 
+Tandem ile yerel kurulum ve doğrulama: `./scripts/bootstrap.sh` ve ardından
+`./scripts/verify.sh`. Bu kapı Node testlerini, Vite üretim derlemesini,
+mimari ve yerel secret kontrollerini çalıştırır. GitHub koruması ve CI ayrıca
+sahibi tarafından yapılandırılmalıdır; bkz. `docs/github-setup.md`.
+
 `npm run build` çıktısı `dist/` altındadır. Uygulama `BrowserRouter` kullanır; sunucunun bilinmeyen yolları `index.html`'e düşürmesi gerekir. Vite dev ve preview bunu kendiliğinden yapar, Vercel'de `vercel.json` içindeki SPA rewrite aynı işi görür.
 
 ## Rotalar
@@ -123,4 +128,4 @@ Tasarım: tinted L-frame + beyaz çalışma sayfası; veri rengi kavurma amberi.
 - Giriş ve roller **sahtedir**: istemci tarafında çalışır, sunucuda doğrulanmaz ve bir güvenlik sınırı oluşturmaz. Şifreler herkese açık demo değerleridir; gerçek kullanıcı veya müşteri verisiyle kullanılmamalıdır.
 - Canlı veri, API, gerçek mesaj gönderimi ve kalıcı aksiyon kaydı yok. Mesaj düğmesi yalnızca panoya kopyalar veya `mailto:` açar; çözülen aksiyonlar sayfa yenilenince sıfırlanır.
 - Uygulama JavaScript ve bir build adımı gerektirir. `file://` ile açılış desteklenmez; istemci yönlendirmesi için sunucu tarafında SPA fallback gerekir.
-- Depoda otomatik test paketi yoktur; doğrulama `npm run build` ve tarayıcıda rota/rol kontrolleriyle yapılır.
+- Node testleri bazı veri ve biçimlendirme kurallarını kapsar; rota ve rol davranışları için otomatik tarayıcı testi henüz yoktur.

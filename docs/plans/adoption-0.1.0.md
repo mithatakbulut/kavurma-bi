@@ -24,7 +24,11 @@ Not run: baseline disabled by the caller.
 - `README.md` — existing file differs and there is no managed baseline; proposed content at `.harness/proposals/README.md`
 - `.gitignore` — existing file differs and there is no managed baseline; proposed content at `.harness/proposals/.gitignore`
 
-Resolve each conflict by hand, then delete its proposal. The adoption remains partial until then.
+Resolved locally: preserved the existing README, added setup instructions, and
+merged useful ignore patterns into the existing `.gitignore`. Both proposals
+were removed. The project-specific bootstrap, verification and workflow run
+the real locked dependencies and Vite build; the manifest records their current
+digests while retaining the original template digests for safe upgrades.
 
 ## Pull request plan
 

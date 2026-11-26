@@ -14,6 +14,7 @@ step "toolchain"
 
 
 need node
+need npm
 printf 'node: %s\n' "$(node --version)"
 
 need git
@@ -28,6 +29,9 @@ done < <(find src test \( -name '*.js' -o -name '*.mjs' \) -print0)
 
 step "node: unit"
 node --test
+
+step "node: production build"
+npm run build
 
 
 

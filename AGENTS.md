@@ -6,8 +6,9 @@ an instruction dump; keep it short and current.
 
 ## Purpose
 
-Describe in two or three sentences what this repository does and what a correct
-change must preserve. Replace this paragraph when you adopt the blueprint.
+Kavurma BI is a React and Vite subscription dashboard demo. Preserve its routes,
+demo role behavior, data consistency and accessible interactions. Its client-side
+login is a demonstration, not a security boundary.
 
 ## Setup and verification
 
@@ -23,13 +24,15 @@ change land.
 
 ## Layout
 
-Document the real top-level directories here. The blueprint creates:
+The main directories are:
 
 ```text
 .harness/        project.yaml, policy.yaml, manifest.yaml, exceptions
 .github/         issue and PR templates, required verification workflow
 docs/            architecture, testing, decisions, plans
 scripts/         bootstrap, verify, doctor, architecture and security checks
+src/             React views, components, demo data and helpers
+test/            Node unit tests
 ```
 
 ## Protected paths

@@ -11,7 +11,7 @@ files:
   - path: AGENTS.md
     strategy: merge
     template_version: 0.1.0
-    sha256: 769dff7d0ec02f59d49386baafb4c761b859ee9497c9500a84eca0559ccb3f47
+    sha256: 097d485e17645ae70b63c8a2a72831ea08ce9b099c9f53d76ee29941fce4dfb8
     template_sha256: 769dff7d0ec02f59d49386baafb4c761b859ee9497c9500a84eca0559ccb3f47
   - path: docs/architecture/overview.md
     strategy: merge
@@ -56,7 +56,7 @@ files:
   - path: .github/workflows/verify.yml
     strategy: merge
     template_version: 0.1.0
-    sha256: 9917385c75a83a6287154011d9eb4b70da6d685e4811d3d5f3b82961d5a06fd8
+    sha256: 1ef50226bbd344c757ed18c489d8bb9fdc4b2b5c133cb994dec0338b93e1596b
     template_sha256: 9917385c75a83a6287154011d9eb4b70da6d685e4811d3d5f3b82961d5a06fd8
   - path: .nvmrc
     strategy: project-owned
@@ -81,12 +81,12 @@ files:
   - path: scripts/bootstrap.sh
     strategy: replace-unmodified
     template_version: 0.1.0
-    sha256: a3abb28fa6ed78ce81c3c0618b68efb764bb03bee41f956c0fda9b0a63e223ae
+    sha256: 6c0e309450ceca43bc336dc93c6b203b6a2462b890bf405b54dd929341f88d7b
     template_sha256: a3abb28fa6ed78ce81c3c0618b68efb764bb03bee41f956c0fda9b0a63e223ae
   - path: scripts/verify.sh
     strategy: replace-unmodified
     template_version: 0.1.0
-    sha256: 29162a3f8a2780e4b2cc5a9ae42428b59fe2a84bbabc5db5d1b77f171ccae4db
+    sha256: 0e2c07647cbfce16a60bf9e33092f78a9f492450402259042a2bebbd1be59479
     template_sha256: 29162a3f8a2780e4b2cc5a9ae42428b59fe2a84bbabc5db5d1b77f171ccae4db
   - path: scripts/doctor.sh
     strategy: replace-unmodified

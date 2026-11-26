@@ -16,6 +16,7 @@ step "toolchain"
 
 
 need node
+need npm
 printf 'node: %s\n' "$(node --version)"
 
 need git
@@ -24,9 +25,7 @@ printf 'git: %s\n' "$(git --version)"
 
 
 step "dependencies"
-# This starter has no third-party runtime dependency. If you add one, install
-# it from a committed lockfile here and keep the verify step offline.
-printf 'no package dependencies to install\n'
+npm ci
 
 
 printf '\nbootstrap: PASS\n'
